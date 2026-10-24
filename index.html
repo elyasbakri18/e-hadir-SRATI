@@ -34,19 +34,19 @@
     }
   </style>
 </head>
-<body class="text-slate-800 antialiased h-screen flex flex-col selection:bg-blue-200 selection:text-blue-900">
+<body class="text-slate-800 antialiased h-screen flex flex-col selection:bg-emerald-200 selection:text-emerald-900">
 
   <div id="app" class="flex-grow flex flex-col h-full w-full max-w-5xl mx-auto bg-white shadow-2xl sm:rounded-none md:rounded-lg overflow-hidden print-container md:my-4 border border-slate-200">
     
     <!-- HEADER -->
-    <header class="bg-gradient-to-r from-blue-700 to-indigo-800 text-white px-5 py-4 shadow-md flex justify-between items-center z-10 no-print">
+    <header class="bg-gradient-to-r from-emerald-700 to-teal-900 text-white px-5 py-4 shadow-md flex justify-between items-center z-10 no-print">
       <div class="flex items-center gap-4">
-        <div class="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
-          <i class="fas fa-school text-2xl text-blue-50"></i>
+        <div class="bg-white/90 p-1.5 rounded-lg shadow-sm h-12 w-12 flex items-center justify-center">
+          <img src="https://iili.io/nemTMJa.md.png" alt="Logo SRATI" class="max-h-full max-w-full object-contain">
         </div>
         <div>
           <h1 class="text-xl font-bold tracking-tight">e-Hadir SRATI</h1>
-          <p class="text-xs text-blue-200 font-medium mt-0.5">Sistem Kehadiran & Pergerakan Staf</p>
+          <p class="text-xs text-emerald-100 font-medium mt-0.5">Sistem Kehadiran & Pergerakan Staf</p>
         </div>
       </div>
       <div v-if="view !== 'login'" class="text-right">
@@ -59,7 +59,7 @@
     <!-- LOADING OVERLAY -->
     <div v-if="isLoading" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex flex-col items-center justify-center text-white no-print">
       <div class="bg-white/10 p-6 rounded-2xl flex flex-col items-center shadow-2xl border border-white/20">
-        <i class="fas fa-circle-notch fa-spin text-5xl mb-4 text-blue-400"></i>
+        <i class="fas fa-circle-notch fa-spin text-5xl mb-4 text-emerald-400"></i>
         <p class="text-lg font-medium tracking-wide">{{ loadingMsg }}</p>
       </div>
     </div>
@@ -72,8 +72,8 @@
         <div v-if="view === 'login'" class="max-w-md mx-auto mt-6 md:mt-12">
           
           <div class="text-center mb-8">
-            <div class="inline-flex bg-blue-100 p-5 rounded-2xl mb-4 shadow-inner">
-              <i class="fas fa-fingerprint text-5xl text-blue-600"></i>
+            <div class="inline-flex bg-white p-2 rounded-2xl mb-4 shadow-sm border border-slate-100">
+              <img src="https://iili.io/nemTMJa.md.png" alt="Logo SRATI" class="h-24 w-24 object-contain rounded-xl">
             </div>
             <h2 class="text-3xl font-bold text-slate-800 tracking-tight">Selamat Datang</h2>
             <p class="text-slate-500 mt-2">Log masuk untuk meneruskan sesi anda</p>
@@ -82,10 +82,10 @@
           <div class="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
             <!-- TABS -->
             <div class="flex border-b border-slate-100 bg-slate-50/50">
-              <button @click="loginType = 'teacher'" :class="{'bg-white font-semibold text-blue-600 border-b-2 border-blue-600': loginType === 'teacher', 'text-slate-500 hover:text-slate-700': loginType === 'admin'}" class="flex-1 py-4 text-sm transition-all text-center">
+              <button @click="loginType = 'teacher'" :class="{'bg-white font-semibold text-emerald-600 border-b-2 border-emerald-600': loginType === 'teacher', 'text-slate-500 hover:text-slate-700': loginType === 'admin'}" class="flex-1 py-4 text-sm transition-all text-center">
                 <i class="fas fa-chalkboard-teacher mr-2"></i> Guru / Staf
               </button>
-              <button @click="loginType = 'admin'" :class="{'bg-white font-semibold text-blue-600 border-b-2 border-blue-600': loginType === 'admin', 'text-slate-500 hover:text-slate-700': loginType === 'teacher'}" class="flex-1 py-4 text-sm transition-all text-center">
+              <button @click="loginType = 'admin'" :class="{'bg-white font-semibold text-emerald-600 border-b-2 border-emerald-600': loginType === 'admin', 'text-slate-500 hover:text-slate-700': loginType === 'teacher'}" class="flex-1 py-4 text-sm transition-all text-center">
                 <i class="fas fa-user-shield mr-2"></i> Pentadbir
               </button>
             </div>
@@ -95,7 +95,7 @@
               <div v-if="loginType === 'teacher'">
                 <label class="block text-sm font-medium text-slate-700 mb-2">Pilih Nama Pengguna</label>
                 <div class="relative">
-                  <select v-model="selectedStaff" @change="loginTeacher" class="w-full border-slate-200 border-2 rounded-xl p-3.5 appearance-none focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer text-slate-700">
+                  <select v-model="selectedStaff" @change="loginTeacher" class="w-full border-slate-200 border-2 rounded-xl p-3.5 appearance-none focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer text-slate-700">
                     <option value="" disabled selected>{{ staffList.length === 0 ? 'Memuat turun senarai...' : '-- Sila Pilih Nama Anda --' }}</option>
                     <option v-for="staff in staffList" :key="staff.id" :value="staff.id">
                       {{ staff.name }} ({{ staff.id }})
@@ -105,8 +105,8 @@
                     <i class="fas fa-chevron-down"></i>
                   </div>
                 </div>
-                <div class="mt-4 bg-blue-50/50 border border-blue-100 rounded-lg p-3 flex items-start gap-3">
-                  <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
+                <div class="mt-4 bg-emerald-50/50 border border-emerald-100 rounded-lg p-3 flex items-start gap-3">
+                  <i class="fas fa-info-circle text-emerald-500 mt-0.5"></i>
                   <p class="text-xs text-slate-500 leading-relaxed">
                     Sistem akan mendaftar masuk secara automatik selepas anda memilih nama. Pastikan lokasi peranti diaktifkan.
                   </p>
@@ -117,13 +117,13 @@
               <form v-if="loginType === 'admin'" @submit.prevent="loginAdmin">
                 <div class="mb-5">
                   <label class="block text-sm font-medium text-slate-700 mb-2">ID Pengguna</label>
-                  <input type="text" v-model="adminUser" required class="w-full border-slate-200 border-2 rounded-xl p-3.5 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 bg-slate-50 transition-colors" placeholder="Masukkan ID Pentadbir">
+                  <input type="text" v-model="adminUser" required class="w-full border-slate-200 border-2 rounded-xl p-3.5 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 bg-slate-50 transition-colors" placeholder="Masukkan ID Pentadbir">
                 </div>
                 <div class="mb-6">
                   <label class="block text-sm font-medium text-slate-700 mb-2">Kata Laluan</label>
-                  <input type="password" v-model="adminPass" required class="w-full border-slate-200 border-2 rounded-xl p-3.5 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 bg-slate-50 transition-colors" placeholder="••••••••">
+                  <input type="password" v-model="adminPass" required class="w-full border-slate-200 border-2 rounded-xl p-3.5 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 bg-slate-50 transition-colors" placeholder="••••••••">
                 </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-3.5 rounded-xl shadow-lg shadow-blue-500/30 transition-all transform hover:-translate-y-0.5">
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-semibold py-3.5 rounded-xl shadow-lg shadow-emerald-500/30 transition-all transform hover:-translate-y-0.5">
                   Log Masuk
                 </button>
               </form>
@@ -140,7 +140,7 @@
           
           <!-- INFO PROFIL -->
           <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-5 relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-1.5 h-full bg-blue-500"></div>
+            <div class="absolute top-0 left-0 w-1.5 h-full bg-emerald-500"></div>
             <div class="flex justify-between items-start mb-4">
               <div>
                 <h2 class="text-xl font-bold text-slate-800">{{ currentUser.name }}</h2>
@@ -211,7 +211,7 @@
             <button v-if="teacherState === 'NOT_CHECKED_IN'" @click="performAction('startCourse')" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white p-5 rounded-2xl font-bold flex flex-col items-center justify-center transition-all h-28 shadow-lg shadow-indigo-500/20 hover:-translate-y-0.5 relative overflow-hidden group">
               <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out"></div>
               <i class="fas fa-chalkboard-teacher text-3xl mb-2 relative z-10"></i>
-              <span class="relative z-10 tracking-wide text-sm">REKOD BERKURSUS / BENGKEL</span>
+              <span class="relative z-10 tracking-wide text-sm">HADIR KURSUS / BENGKEL</span>
             </button>
 
             <!-- Urusan Luar -->
@@ -301,7 +301,7 @@
                 <i class="fas fa-calendar-alt text-slate-400 ml-3 mr-2"></i>
                 <input type="date" v-model="adminDate" @change="fetchAdminData" class="border-none bg-transparent text-sm focus:ring-0 text-slate-700 font-medium py-1.5 pr-2 outline-none cursor-pointer">
               </div>
-              <button @click="fetchAdminData" class="bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-100 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors flex items-center">
+              <button @click="fetchAdminData" class="bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-100 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors flex items-center">
                 <i class="fas fa-sync-alt mr-2"></i> Segar
               </button>
               <button @click="printReport" class="bg-slate-800 text-white hover:bg-slate-700 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors shadow-md flex items-center">
@@ -312,13 +312,13 @@
 
           <!-- TAB NAVIGASI ADMIN -->
           <div class="flex overflow-x-auto border-b border-slate-200 mb-6 no-print gap-6">
-            <button @click="adminTab = 'hadir'" :class="adminTab === 'hadir' ? 'border-b-2 border-blue-600 text-blue-600 font-bold' : 'text-slate-500 hover:text-slate-700 font-medium'" class="pb-3 text-sm transition-colors whitespace-nowrap flex items-center">
+            <button @click="adminTab = 'hadir'" :class="adminTab === 'hadir' ? 'border-b-2 border-emerald-600 text-emerald-600 font-bold' : 'text-slate-500 hover:text-slate-700 font-medium'" class="pb-3 text-sm transition-colors whitespace-nowrap flex items-center">
               <i class="fas fa-users mr-2"></i> Rekod Harian
             </button>
-            <button @click="adminTab = 'pergerakan'" :class="adminTab === 'pergerakan' ? 'border-b-2 border-blue-600 text-blue-600 font-bold' : 'text-slate-500 hover:text-slate-700 font-medium'" class="pb-3 text-sm transition-colors whitespace-nowrap flex items-center">
+            <button @click="adminTab = 'pergerakan'" :class="adminTab === 'pergerakan' ? 'border-b-2 border-emerald-600 text-emerald-600 font-bold' : 'text-slate-500 hover:text-slate-700 font-medium'" class="pb-3 text-sm transition-colors whitespace-nowrap flex items-center">
               <i class="fas fa-route mr-2"></i> Log Pergerakan
             </button>
-            <button @click="adminTab = 'staf'" :class="adminTab === 'staf' ? 'border-b-2 border-blue-600 text-blue-600 font-bold' : 'text-slate-500 hover:text-slate-700 font-medium'" class="pb-3 text-sm transition-colors whitespace-nowrap flex items-center">
+            <button @click="adminTab = 'staf'" :class="adminTab === 'staf' ? 'border-b-2 border-emerald-600 text-emerald-600 font-bold' : 'text-slate-500 hover:text-slate-700 font-medium'" class="pb-3 text-sm transition-colors whitespace-nowrap flex items-center">
               <i class="fas fa-user-cog mr-2"></i> Pengurusan Staf
             </button>
           </div>
@@ -440,83 +440,153 @@
           </div>
 
           <!-- TAB: PENGURUSAN STAF -->
-          <div v-if="adminTab === 'staf'" class="no-print max-w-3xl">
+          <div v-if="adminTab === 'staf'" class="no-print max-w-4xl">
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
-              <div class="flex items-center mb-4 text-blue-600">
-                <div class="bg-blue-50 p-2.5 rounded-xl mr-4"><i class="fas fa-file-upload text-xl"></i></div>
-                <h3 class="font-bold text-slate-800 text-xl">Muat Naik Data Staf</h3>
-              </div>
-              <p class="text-sm text-slate-500 mb-6 leading-relaxed">Format yang disokong: Fail <strong>.CSV</strong> atau <strong>.TXT</strong>. <br> Struktur data mestilah mengandungi lajur <code>ID Staf</code> dan <code>Nama</code> yang dipisahkan oleh koma atau tab.</p>
               
-              <div class="border-2 border-dashed border-slate-300 hover:border-blue-400 rounded-2xl p-10 text-center bg-slate-50 hover:bg-blue-50/30 transition-colors group">
-                <input type="file" @change="handleFileUpload" accept=".csv, .txt" id="fileUpload" class="hidden">
-                <label for="fileUpload" class="cursor-pointer flex flex-col items-center">
-                  <div class="bg-white p-4 rounded-full shadow-sm mb-4 group-hover:scale-110 transition-transform">
-                    <i class="fas fa-cloud-upload-alt text-3xl text-blue-500"></i>
-                  </div>
-                  <span class="bg-white border border-slate-200 text-slate-700 hover:text-blue-600 px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors shadow-sm mb-3">Pilih Fail / Semak imbas</span>
-                  <span class="text-xs text-slate-500 font-medium">{{ selectedFileName || 'Tiada fail dipilih' }}</span>
-                </label>
+              <!-- Sub Tab Pengurusan Staf -->
+              <div class="flex border-b border-slate-100 mb-6">
+                <button @click="adminManageTab = 'list'; fetchAdminStaff()" :class="adminManageTab === 'list' ? 'border-b-2 border-emerald-600 text-emerald-600 font-bold' : 'text-slate-500 hover:text-slate-700 font-medium'" class="pb-3 px-4 text-sm transition-colors flex items-center">
+                  <i class="fas fa-list-ul mr-2"></i> Senarai Staf
+                </button>
+                <button @click="adminManageTab = 'add'" :class="adminManageTab === 'add' ? 'border-b-2 border-emerald-600 text-emerald-600 font-bold' : 'text-slate-500 hover:text-slate-700 font-medium'" class="pb-3 px-4 text-sm transition-colors flex items-center">
+                  <i class="fas fa-user-plus mr-2"></i> Daftar Staf
+                </button>
               </div>
 
-              <div v-if="parsedStaffList.length > 0" class="mt-6 border border-slate-200 rounded-2xl overflow-hidden bg-white">
-                <div class="bg-emerald-50 border-b border-emerald-100 text-emerald-800 p-4 text-sm font-bold flex justify-between items-center">
-                  <div class="flex items-center">
-                    <i class="fas fa-check-circle mr-2"></i>
-                    <span>{{ parsedStaffList.length }} rekod sedia dimuat naik.</span>
-                  </div>
-                  <button @click="uploadStaffData" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-sm transition-colors transform hover:-translate-y-0.5">Muat Naik Sekarang</button>
+              <!-- Pandangan Senarai Staf -->
+              <div v-if="adminManageTab === 'list'">
+                <div class="flex justify-between items-center mb-4 min-h-[40px]">
+                  <h4 class="font-bold text-slate-800 text-sm">Senarai Guru & Staf</h4>
+                  <transition name="fade">
+                    <button v-if="selectedStaffIds.length > 0" @click="bulkDeleteStaff" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center shadow-sm">
+                      <i class="fas fa-trash-alt mr-2"></i> Padam Pilihan ({{ selectedStaffIds.length }})
+                    </button>
+                  </transition>
                 </div>
-                <div class="max-h-56 overflow-y-auto p-4 text-sm font-mono bg-slate-50/50">
-                  <div v-for="(s, idx) in parsedStaffList.slice(0,5)" :key="idx" class="py-2 border-b border-slate-100 flex gap-4">
-                    <span class="text-slate-400 w-20">{{ s.id }}</span>
-                    <span class="text-slate-700 font-medium">{{ s.name }}</span>
-                  </div>
-                  <div v-if="parsedStaffList.length > 5" class="py-3 text-slate-400 text-xs italic text-center">... dan {{ parsedStaffList.length - 5 }} baris data lagi tersembunyi.</div>
+                <div class="overflow-x-auto">
+                  <table class="w-full text-left border-collapse">
+                    <thead>
+                      <tr class="bg-slate-50 text-slate-500 uppercase text-[10px] tracking-wider font-bold border-b border-slate-200">
+                        <th class="p-3 w-10 text-center">
+                          <input type="checkbox" v-model="selectAllStaff" @change="toggleSelectAllStaff" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer w-4 h-4">
+                        </th>
+                        <th class="p-3">ID Staf</th>
+                        <th class="p-3">Nama</th>
+                        <th class="p-3">Peranti</th>
+                        <th class="p-3 text-right">Tindakan</th>
+                      </tr>
+                    </thead>
+                    <tbody class="text-sm">
+                      <tr v-if="adminStaffList.length === 0">
+                        <td colspan="5" class="p-6 text-center text-slate-400">Tiada rekod staf.</td>
+                      </tr>
+                      <tr v-for="staff in adminStaffList" :key="staff.id" class="border-b border-slate-100 hover:bg-slate-50 transition-colors" :class="{'bg-emerald-50/50': selectedStaffIds.includes(staff.id)}">
+                        <td class="p-3 text-center">
+                          <input type="checkbox" v-model="selectedStaffIds" :value="staff.id" @change="updateSelectAllStatus" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer w-4 h-4">
+                        </td>
+                        <td class="p-3 font-mono text-slate-600">{{ staff.id }}</td>
+                        <td class="p-3 font-medium text-slate-800">{{ staff.name }}</td>
+                        <td class="p-3">
+                          <span v-if="staff.device" class="text-xs bg-emerald-50 text-emerald-600 px-2 py-1 rounded-md border border-emerald-100">
+                            <i class="fas fa-mobile-alt mr-1"></i> Terikat
+                          </span>
+                          <span v-else class="text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded-md">
+                            Tiada Peranti
+                          </span>
+                        </td>
+                        <td class="p-3 text-right flex justify-end gap-2">
+                          <button v-if="staff.device" @click="resetStaffDevice(staff.id)" class="text-xs bg-amber-50 hover:bg-amber-100 text-amber-600 border border-amber-200 px-3 py-1.5 rounded-lg transition-colors">
+                            <i class="fas fa-unlock-alt mr-1"></i> Reset
+                          </button>
+                          <button @click="deleteStaff(staff.id)" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 px-3 py-1.5 rounded-lg transition-colors">
+                            <i class="fas fa-trash-alt mr-1"></i> Padam
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
+              </div>
+
+              <!-- Pandangan Daftar Staf -->
+              <div v-if="adminManageTab === 'add'">
+                <!-- Pendaftaran Manual -->
+                <div class="mb-8 p-5 bg-emerald-50/50 border border-emerald-100 rounded-xl">
+                  <h4 class="font-bold text-slate-700 mb-4 flex items-center"><i class="fas fa-user-edit mr-2 text-emerald-500"></i> Pendaftaran Manual</h4>
+                  <form @submit.prevent="registerSingleStaff" class="flex flex-col sm:flex-row gap-3">
+                    <input type="text" v-model="newStaff.id" placeholder="ID Staf" required class="flex-1 border-slate-200 border rounded-lg p-2.5 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none">
+                    <input type="text" v-model="newStaff.name" placeholder="Nama Penuh" required class="flex-2 border-slate-200 border rounded-lg p-2.5 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none">
+                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 px-6 rounded-lg shadow-sm transition-colors text-sm">
+                      Tambah
+                    </button>
+                  </form>
+                </div>
+
+                <div class="flex items-center mb-4 text-emerald-600">
+                  <div class="bg-emerald-50 p-2.5 rounded-xl mr-4"><i class="fas fa-file-upload text-xl"></i></div>
+                  <h3 class="font-bold text-slate-800 text-xl">Muat Naik Data Berkelompok (Pukal)</h3>
+                </div>
+                <p class="text-sm text-slate-500 mb-6 leading-relaxed">Format yang disokong: Fail <strong>.CSV</strong> atau <strong>.TXT</strong>. <br> Struktur data mestilah mengandungi lajur <code>ID Staf</code> dan <code>Nama</code> yang dipisahkan oleh koma atau tab.</p>
+                
+                <div class="border-2 border-dashed border-slate-300 hover:border-emerald-400 rounded-2xl p-10 text-center bg-slate-50 hover:bg-emerald-50/30 transition-colors group">
+                  <input type="file" @change="handleFileUpload" accept=".csv, .txt" id="fileUpload" class="hidden">
+                  <label for="fileUpload" class="cursor-pointer flex flex-col items-center">
+                    <i class="fas fa-cloud-upload-alt text-4xl text-slate-400 mb-3 group-hover:text-emerald-500 transition-colors"></i>
+                    <span class="text-slate-600 font-medium">Klik untuk pilih fail</span>
+                    <span class="text-xs text-slate-400 mt-1">{{ selectedFileName || 'Tiada fail dipilih' }}</span>
+                  </label>
+                </div>
+                
+                <div v-if="parsedStaffList.length > 0" class="mt-6 bg-white p-5 rounded-xl border border-emerald-100 shadow-sm">
+                  <div class="flex justify-between items-center mb-4">
+                    <div>
+                      <h4 class="font-bold text-slate-800 text-sm">Pratonton Data</h4>
+                      <p class="text-xs text-slate-500">Terdapat {{ parsedStaffList.length }} rekod sedia untuk dimuat naik.</p>
+                    </div>
+                    <button @click="uploadStaffData" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-5 rounded-lg shadow-sm transition-colors text-sm">
+                      <i class="fas fa-check-circle mr-1"></i> Sahkan & Muat Naik
+                    </button>
+                  </div>
+                  <div class="max-h-60 overflow-y-auto bg-slate-50 rounded-lg border border-slate-100 p-2">
+                    <table class="w-full text-left text-xs">
+                      <tbody>
+                        <tr v-for="(staff, idx) in parsedStaffList.slice(0, 5)" :key="idx" class="border-b border-slate-100 last:border-0">
+                          <td class="p-2 font-mono text-slate-500 w-24">{{ staff.id }}</td>
+                          <td class="p-2 font-medium text-slate-700">{{ staff.name }}</td>
+                        </tr>
+                        <tr v-if="parsedStaffList.length > 5">
+                          <td colspan="2" class="p-2 text-center text-slate-400 italic">... dan {{ parsedStaffList.length - 5 }} lagi rekod</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
               </div>
             </div>
-            
-             <!-- Admin Toast Messages -->
-             <transition name="fade">
-              <div v-if="sysMessage" class="mt-6 p-4 rounded-xl shadow-sm flex items-center justify-between font-medium border" :class="sysMessage.type === 'error' ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'">
-                <div class="flex items-center">
-                  <i :class="sysMessage.type === 'error' ? 'fas fa-exclamation-triangle' : 'fas fa-check-circle'" class="mr-3"></i> 
-                  <span class="text-sm">{{ sysMessage.text }}</span>
-                </div>
-                <button @click="sysMessage = null" class="opacity-50 hover:opacity-100 transition-opacity"><i class="fas fa-times"></i></button>
-              </div>
-            </transition>
           </div>
         </div>
       </transition>
     </main>
-
-    <!-- FOOTER -->
-    <footer class="bg-white border-t border-slate-100 p-4 text-center no-print">
-      <p class="text-[11px] text-slate-400 font-medium">&copy; {{ new Date().getFullYear() }} SRATI - Sistem Pengurusan Kehadiran Pintar</p>
-    </footer>
   </div>
 
   <script>
     const app = Vue.createApp({
       data() {
         return {
-          // Pautan Google Apps Script Terkini
+          // Tetapan API Google Apps Script
           gasUrl: 'https://script.google.com/macros/s/AKfycbzqwlVFkcqECI9Ln2-_IGN-pTHVpx-Y5bJ3hTpoHECt2844h5Ma3rn6RvTav-05KYNFfg/exec',
           
+          // State UI
           view: 'login', // login, teacher, admin
-          loginType: 'teacher', 
+          loginType: 'teacher',
           
-          // Data Login Admin
+          // State Login
+          staffList: [],
+          selectedStaff: '',
           adminUser: '',
           adminPass: '',
           adminToken: '',
-
-          // Data Login Guru
-          selectedStaff: '',
-          
-          staffList: [],
 
           // State Semasa Guru
           currentUser: null,
@@ -543,6 +613,11 @@
           
           // Admin Data
           adminTab: 'hadir',
+          adminManageTab: 'list', // 'list' atau 'add'
+          adminStaffList: [],
+          selectedStaffIds: [],
+          selectAllStaff: false,
+          newStaff: { id: '', name: '' },
           adminDate: new Date().toLocaleDateString('en-CA'),
           adminLogs: [],
           adminStats: { total: 0, present: 0, offcampus: 0, course: 0, completed: 0 },
@@ -601,12 +676,12 @@
         
         mockApi(payload) {
           const t = new Date().toISOString();
-          if (payload.action === 'getStaffList') {
+          if (payload.action === 'getStaffList' || payload.action === 'adminGetStaff') {
             return {
               success: true,
               staffList: [
-                { id: 'S001', name: 'GURU CONTOH SATU' },
-                { id: 'S002', name: 'GURU CONTOH DUA' }
+                { id: 'S001', name: 'GURU CONTOH SATU', device: 'DEV-123' },
+                { id: 'S002', name: 'GURU CONTOH DUA', device: '' }
               ]
             };
           }
@@ -628,6 +703,7 @@
             };
           }
           if (payload.action === 'bulkRegister') return { success: true, message: 'Berjaya muat naik pukal (Demo)' };
+          if (payload.action === 'adminBulkDeleteStaff') return { success: true, message: 'Berjaya memadam staf secara pukal (Demo)' };
           
           return { success: true, message: 'Tindakan direkod (Demo)', time: t, distance: 50 };
         },
@@ -723,6 +799,7 @@
             this.adminToken = res.token;
             this.view = 'admin';
             this.fetchAdminData();
+            this.fetchAdminStaff();
           } else {
             this.showMessage(res.message, 'error');
           }
@@ -736,6 +813,23 @@
           this.adminPass = '';
           this.adminToken = '';
           this.fetchStaffList(); 
+        },
+
+        async fetchAdminData() {
+          this.isLoading = true;
+          this.loadingMsg = 'Memuat turun rekod...';
+          const res = await this.apiCall({ 
+            action: 'getAdminData', 
+            token: this.adminToken,
+            date: this.adminDate 
+          });
+          this.isLoading = false;
+          if (res.success) {
+            this.adminLogs = res.attendance || [];
+            this.adminStats = res.stats || { total: 0, present: 0, offcampus: 0, course: 0, completed: 0, absent: 0 };
+          } else {
+            this.showMessage(res.message, 'error');
+          }
         },
 
         async performAction(actionStr) {
@@ -780,24 +874,99 @@
           }
         },
 
-        async fetchAdminData() {
+        async fetchAdminStaff() {
           this.isLoading = true;
-          this.loadingMsg = 'Memuat Data...';
+          this.selectedStaffIds = []; // reset senarai pilihan
+          this.selectAllStaff = false; // reset butang select all
+          const res = await this.apiCall({ action: 'adminGetStaff', token: this.adminToken });
+          this.isLoading = false;
+          if (res.success) {
+            this.adminStaffList = res.staffList;
+          }
+        },
+
+        toggleSelectAllStaff() {
+          if (this.selectAllStaff) {
+            this.selectedStaffIds = this.adminStaffList.map(staff => staff.id);
+          } else {
+            this.selectedStaffIds = [];
+          }
+        },
+
+        updateSelectAllStatus() {
+          if (this.adminStaffList.length === 0) {
+            this.selectAllStaff = false;
+            return;
+          }
+          this.selectAllStaff = this.selectedStaffIds.length === this.adminStaffList.length;
+        },
+
+        async bulkDeleteStaff() {
+          if (this.selectedStaffIds.length === 0) return;
+          if (!confirm(`Adakah anda pasti mahu memadam ${this.selectedStaffIds.length} rekod staf secara kekal?`)) return;
           
-          const payload = {
-            action: 'getAdminData',
-            token: this.adminToken,
-            date: this.adminDate
-          };
-          
-          const res = await this.apiCall(payload);
+          this.isLoading = true;
+          this.loadingMsg = 'Memadam Rekod Secara Pukal...';
+          const res = await this.apiCall({ 
+            action: 'adminBulkDeleteStaff', 
+            token: this.adminToken, 
+            staffIds: this.selectedStaffIds 
+          });
           this.isLoading = false;
           
           if (res.success) {
-            this.adminLogs = res.attendance || [];
-            if (res.stats) {
-              this.adminStats = res.stats;
-            }
+            this.showMessage(res.message);
+            this.fetchAdminStaff();
+          } else {
+            this.showMessage(res.message, 'error');
+          }
+        },
+
+        async registerSingleStaff() {
+          if (!this.newStaff.id || !this.newStaff.name) return;
+          this.isLoading = true;
+          this.loadingMsg = 'Mendaftar Staf...';
+          const res = await this.apiCall({
+            action: 'registerTeacher',
+            token: this.adminToken,
+            staffId: this.newStaff.id,
+            name: this.newStaff.name
+          });
+          this.isLoading = false;
+          
+          if (res.success) {
+            this.showMessage(res.message);
+            this.newStaff.id = '';
+            this.newStaff.name = '';
+            this.fetchAdminStaff();
+          } else {
+            this.showMessage(res.message, 'error');
+          }
+        },
+
+        async deleteStaff(staffId) {
+          if(!confirm(`Adakah anda pasti mahu memadam staf dengan ID ${staffId}?`)) return;
+          this.isLoading = true;
+          this.loadingMsg = 'Memadam Rekod...';
+          const res = await this.apiCall({ action: 'adminDeleteStaff', token: this.adminToken, staffId: staffId });
+          this.isLoading = false;
+          if (res.success) {
+            this.showMessage(res.message);
+            this.fetchAdminStaff();
+          } else {
+            this.showMessage(res.message, 'error');
+          }
+        },
+
+        async resetStaffDevice(staffId) {
+          if(!confirm(`Adakah anda pasti mahu set semula peranti (reset device binding) untuk ID ${staffId}?`)) return;
+          this.isLoading = true;
+          this.loadingMsg = 'Set Semula Peranti...';
+          const res = await this.apiCall({ action: 'adminResetDevice', token: this.adminToken, staffId: staffId });
+          this.isLoading = false;
+          if (res.success) {
+            this.showMessage(res.message);
+            this.fetchAdminStaff();
           } else {
             this.showMessage(res.message, 'error');
           }
