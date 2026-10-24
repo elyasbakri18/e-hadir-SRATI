@@ -1,724 +1,845 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>e-Hadir SRATI - Smart Teacher Attendance</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
-        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
-        .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
-        .fade-enter-from, .fade-leave-to { opacity: 0; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>e-Hadir SRATI</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Vue.js 3 -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f3f4f6;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
+    .fade-enter-from, .fade-leave-to { opacity: 0; }
+    @media print {
+      .no-print { display: none !important; }
+      body { background-color: white; }
+      .print-container { padding: 0 !important; margin: 0 !important; width: 100% !important; }
+      .shadow-md { box-shadow: none !important; }
+    }
+  </style>
 </head>
-<body>
-    <div id="app" class="min-h-screen pb-10">
-        
-        <!-- Header -->
-        <header class="bg-blue-800 text-white shadow-lg sticky top-0 z-50">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                    <i class="fas fa-school text-2xl text-blue-200"></i>
-                    <div>
-                        <h1 class="text-xl font-bold leading-tight">e-Hadir SRATI</h1>
-                        <p class="text-xs text-blue-200 uppercase tracking-wider">Pengurusan Kehadiran Pintar</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-4">
-                    <div class="text-right hidden sm:block">
-                        <p class="font-semibold">{{ currentTime }}</p>
-                        <p class="text-xs text-blue-200">{{ currentDate }}</p>
-                    </div>
-                    <button v-if="currentView !== 'config' && currentView !== 'login'" @click="logout" class="bg-red-500 hover:bg-red-600 px-3 py-2 rounded-lg text-sm font-medium transition">
-                        <i class="fas fa-sign-out-alt"></i> Log Keluar
-                    </button>
-                </div>
-            </div>
-        </header>
+<body class="text-gray-800 antialiased h-screen flex flex-col">
 
-        <!-- Main Content Area -->
-        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
-            
-            <!-- Notifikasi Global -->
-            <div v-if="notification.show" :class="`mb-4 p-4 rounded-xl shadow-sm text-sm font-medium flex items-center gap-3 ${notification.type === 'error' ? 'bg-red-100 text-red-800 border-l-4 border-red-500' : 'bg-green-100 text-green-800 border-l-4 border-green-500'}`">
-                <i :class="notification.type === 'error' ? 'fas fa-exclamation-circle text-lg' : 'fas fa-check-circle text-lg'"></i>
-                {{ notification.message }}
-            </div>
-
-            <!-- VIEW 1: CONFIGURATION (First time setup) -->
-            <transition name="fade" mode="out-in">
-                <div v-if="currentView === 'config'" class="max-w-md mx-auto mt-10">
-                    <div class="glass-card p-8 rounded-2xl shadow-xl">
-                        <div class="text-center mb-6">
-                            <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
-                                <i class="fas fa-cogs"></i>
-                            </div>
-                            <h2 class="text-2xl font-bold text-gray-800">Konfigurasi Sistem</h2>
-                            <p class="text-sm text-gray-500 mt-2">Sila masukkan URL Google Apps Script Web App untuk menyambungkan pangkalan data Google Sheets.</p>
-                        </div>
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Web App URL (Gas URL)</label>
-                                <input v-model="tempGasUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-                            </div>
-                            <button @click="saveConfig" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition shadow-md">
-                                Simpan Konfigurasi & Mula
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- VIEW 2: LOGIN -->
-                <div v-else-if="currentView === 'login'" class="max-w-md mx-auto mt-10">
-                    <div class="glass-card p-8 rounded-2xl shadow-xl">
-                        
-                        <!-- Toggle Role -->
-                        <div class="flex p-1 bg-gray-200 rounded-xl mb-6">
-                            <button @click="loginRole = 'teacher'" :class="`flex-1 py-2 text-sm font-semibold rounded-lg transition ${loginRole === 'teacher' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`">Guru</button>
-                            <button @click="loginRole = 'admin'" :class="`flex-1 py-2 text-sm font-semibold rounded-lg transition ${loginRole === 'admin' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'}`">Pentadbir</button>
-                        </div>
-
-                        <!-- Teacher Login -->
-                        <div v-if="loginRole === 'teacher'" class="space-y-5">
-                            <div class="text-center mb-6">
-                                <h2 class="text-2xl font-bold text-gray-800">Log Masuk Guru</h2>
-                                <p class="text-sm text-gray-500 mt-1">Gunakan peranti utama anda untuk mendaftar kehadiran.</p>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">ID Staf (No. Pekerja)</label>
-                                <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <i class="fas fa-id-badge text-gray-400"></i>
-                                    </div>
-                                    <input v-model="loginStaffId" type="text" class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Cth: G12345">
-                                </div>
-                            </div>
-                            <button @click="handleTeacherLogin" :disabled="isLoading" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition shadow-md flex justify-center items-center gap-2 disabled:opacity-70">
-                                <i v-if="isLoading" class="fas fa-spinner fa-spin"></i>
-                                <span>{{ isLoading ? 'Mengesahkan...' : 'Log Masuk' }}</span>
-                            </button>
-                            
-                            <div class="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200 text-xs text-yellow-800 flex gap-2">
-                                <i class="fas fa-shield-alt mt-0.5"></i>
-                                <p><strong>Polisi Keselamatan:</strong> Sistem menggunakan pengikatan peranti (device-binding). Akaun anda akan diikat secara automatik pada peranti pertama log masuk.</p>
-                            </div>
-                        </div>
-
-                        <!-- Admin Login -->
-                        <div v-if="loginRole === 'admin'" class="space-y-5">
-                            <div class="text-center mb-6">
-                                <h2 class="text-2xl font-bold text-gray-800">Log Masuk Pentadbir</h2>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pengguna</label>
-                                <input v-model="adminUsername" type="text" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 transition">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Kata Laluan</label>
-                                <input v-model="adminPassword" type="password" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 transition">
-                            </div>
-                            <button @click="handleAdminLogin" :disabled="isLoading" class="w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 rounded-lg transition shadow-md flex justify-center items-center gap-2">
-                                <i v-if="isLoading" class="fas fa-spinner fa-spin"></i> Log Masuk Portal
-                            </button>
-                        </div>
-
-                        <div class="mt-6 text-center">
-                            <button @click="currentView = 'config'" class="text-xs text-gray-400 hover:text-gray-600 underline"><i class="fas fa-cog"></i> Tetapan Pelayan</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- VIEW 3: TEACHER DASHBOARD -->
-                <div v-else-if="currentView === 'teacher'" class="max-w-md mx-auto space-y-6">
-                    
-                    <!-- Profile Card -->
-                    <div class="bg-white rounded-2xl shadow-sm p-6 border-t-4 border-blue-500">
-                        <div class="flex items-center gap-4">
-                            <div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-2xl font-bold">
-                                {{ user.name.charAt(0) }}
-                            </div>
-                            <div>
-                                <h2 class="text-lg font-bold text-gray-800">{{ user.name }}</h2>
-                                <p class="text-sm text-gray-500">ID: {{ user.staffId }}</p>
-                            </div>
-                        </div>
-                        <div class="mt-4 pt-4 border-t border-gray-100">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm text-gray-500">Status Semasa:</span>
-                                <span :class="`px-3 py-1 rounded-full text-xs font-bold uppercase ${statusColorMap[attendanceState]}`">
-                                    {{ statusTextMap[attendanceState] }}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- GPS Location Card -->
-                    <div class="bg-white rounded-2xl shadow-sm p-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-gray-800 font-bold"><i class="fas fa-map-marker-alt text-red-500 mr-2"></i>Status Lokasi (Geofence)</h3>
-                            <button @click="requestLocation" class="text-blue-500 hover:text-blue-700 bg-blue-50 p-2 rounded-full transition" title="Segar Semula GPS">
-                                <i class="fas fa-sync-alt" :class="{'fa-spin': isLocating}"></i>
-                            </button>
-                        </div>
-                        
-                        <div v-if="isLocating" class="flex flex-col items-center justify-center py-4 space-y-2">
-                            <i class="fas fa-satellite-dish text-gray-400 text-3xl animate-pulse"></i>
-                            <p class="text-sm text-gray-500">Mengesahkan isyarat satelit...</p>
-                        </div>
-                        <div v-else>
-                            <div :class="`p-4 rounded-xl border flex items-start gap-3 ${locationValid ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`">
-                                <i :class="`mt-1 text-xl ${locationValid ? 'fas fa-check-circle text-green-500' : 'fas fa-times-circle text-red-500'}`"></i>
-                                <div>
-                                    <h4 :class="`font-bold text-sm ${locationValid ? 'text-green-800' : 'text-red-800'}`">
-                                        {{ locationValid ? 'Disahkan: Dalam Zon Sekolah' : 'Di Luar Zon / Ralat GPS' }}
-                                    </h4>
-                                    <p class="text-xs text-gray-600 mt-1">Jarak dari sekolah: <strong>{{ location.distance !== null ? location.distance + ' m' : '-' }}</strong></p>
-                                    <p class="text-xs text-gray-600">Ketepatan GPS: <strong>{{ location.accuracy !== null ? Math.round(location.accuracy) + ' m' : '-' }}</strong></p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div class="grid grid-cols-1 gap-4">
-                        
-                        <!-- Check In Button -->
-                        <button v-if="attendanceState === 'NOT_CHECKED_IN'" @click="performAction('checkIn')" :disabled="!locationValid || isSubmitting" class="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-2xl p-4 shadow-lg transition flex flex-col items-center justify-center gap-2 group">
-                            <i class="fas fa-sign-in-alt text-3xl group-hover:scale-110 transition"></i>
-                            <span class="font-bold text-lg">DAFTAR MASUK</span>
-                        </button>
-
-                        <!-- Off Campus / Return Buttons -->
-                        <div v-if="attendanceState === 'PRESENT' || attendanceState === 'RETURNED'" class="space-y-4">
-                            <button @click="showOffCampusModal = true" :disabled="!locationValid || isSubmitting" class="w-full bg-amber-500 hover:bg-amber-600 disabled:bg-gray-300 text-white rounded-2xl p-4 shadow-lg transition flex flex-col items-center justify-center gap-2">
-                                <i class="fas fa-car-side text-3xl"></i>
-                                <span class="font-bold text-lg">MULA TUGAS LUAR</span>
-                            </button>
-                            
-                            <button @click="performAction('checkOut')" :disabled="!locationValid || isSubmitting" class="w-full bg-slate-700 hover:bg-slate-800 disabled:bg-gray-300 text-white rounded-2xl p-4 shadow-lg transition flex flex-col items-center justify-center gap-2">
-                                <i class="fas fa-home text-3xl"></i>
-                                <span class="font-bold text-lg">TAMAT TUGAS / PULANG</span>
-                            </button>
-                        </div>
-
-                        <!-- Return to School Button -->
-                        <button v-if="attendanceState === 'OFF_CAMPUS'" @click="performAction('returnSchool')" :disabled="!locationValid || isSubmitting" class="w-full bg-indigo-500 hover:bg-indigo-600 disabled:bg-gray-300 text-white rounded-2xl p-4 shadow-lg transition flex flex-col items-center justify-center gap-2">
-                            <i class="fas fa-school text-3xl"></i>
-                            <span class="font-bold text-lg">KEMBALI KE SEKOLAH</span>
-                        </button>
-
-                        <!-- Duty Completed State -->
-                        <div v-if="attendanceState === 'COMPLETED'" class="bg-gray-100 rounded-2xl p-6 text-center border-2 border-dashed border-gray-300">
-                            <i class="fas fa-calendar-check text-4xl text-gray-400 mb-3"></i>
-                            <h3 class="font-bold text-gray-700">Tugas Hari Ini Selesai</h3>
-                            <p class="text-sm text-gray-500 mt-1">Terima kasih atas dedikasi anda. Selamat berehat!</p>
-                        </div>
-
-                    </div>
-
-                    <!-- Timeline -->
-                    <div class="bg-white rounded-2xl shadow-sm p-6" v-if="attendanceRecord">
-                        <h3 class="text-gray-800 font-bold mb-4"><i class="fas fa-history text-gray-500 mr-2"></i>Garis Masa Hari Ini</h3>
-                        <div class="relative border-l-2 border-gray-200 ml-3 space-y-4">
-                            <div class="pl-5 relative" v-if="attendanceRecord.checkIn">
-                                <div class="absolute w-3 h-3 bg-emerald-500 rounded-full -left-[7px] top-1 border border-white"></div>
-                                <p class="text-xs text-gray-500">Daftar Masuk</p>
-                                <p class="font-semibold text-sm">{{ attendanceRecord.checkIn }}</p>
-                            </div>
-                            <div class="pl-5 relative" v-if="attendanceRecord.latestDep">
-                                <div class="absolute w-3 h-3 bg-amber-500 rounded-full -left-[7px] top-1 border border-white"></div>
-                                <p class="text-xs text-gray-500">Keluar Urusan Rasmi</p>
-                                <p class="font-semibold text-sm">{{ attendanceRecord.latestDep }}</p>
-                            </div>
-                            <div class="pl-5 relative" v-if="attendanceRecord.latestRet">
-                                <div class="absolute w-3 h-3 bg-indigo-500 rounded-full -left-[7px] top-1 border border-white"></div>
-                                <p class="text-xs text-gray-500">Kembali ke Sekolah</p>
-                                <p class="font-semibold text-sm">{{ attendanceRecord.latestRet }}</p>
-                            </div>
-                            <div class="pl-5 relative" v-if="attendanceRecord.checkOut">
-                                <div class="absolute w-3 h-3 bg-slate-700 rounded-full -left-[7px] top-1 border border-white"></div>
-                                <p class="text-xs text-gray-500">Tamat Tugas</p>
-                                <p class="font-semibold text-sm">{{ attendanceRecord.checkOut }}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- VIEW 4: ADMIN DASHBOARD -->
-                <div v-else-if="currentView === 'admin'" class="space-y-6">
-                    <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm">
-                        <h2 class="text-xl font-bold text-gray-800">Papan Pemuka Pentadbir</h2>
-                        <button @click="loadAdminData" class="text-blue-600 hover:bg-blue-50 p-2 rounded-lg transition"><i class="fas fa-sync-alt" :class="{'fa-spin': isLoading}"></i> Segar Semula</button>
-                    </div>
-
-                    <!-- Stats -->
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4" v-if="adminStats">
-                        <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-blue-500">
-                            <p class="text-xs text-gray-500 uppercase font-bold">Jumlah Guru</p>
-                            <p class="text-2xl font-black text-gray-800">{{ adminStats.total }}</p>
-                        </div>
-                        <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-emerald-500">
-                            <p class="text-xs text-gray-500 uppercase font-bold">Hadir Semasa</p>
-                            <p class="text-2xl font-black text-emerald-600">{{ adminStats.present + adminStats.returned }}</p>
-                        </div>
-                        <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-amber-500">
-                            <p class="text-xs text-gray-500 uppercase font-bold">Tugas Luar</p>
-                            <p class="text-2xl font-black text-amber-600">{{ adminStats.offcampus }}</p>
-                        </div>
-                        <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-red-500">
-                            <p class="text-xs text-gray-500 uppercase font-bold">Selesai/Belum</p>
-                            <p class="text-2xl font-black text-red-600">{{ adminStats.completed }} / {{ adminStats.absent }}</p>
-                        </div>
-                    </div>
-
-                    <!-- Attendance Table -->
-                    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                        <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                            <h3 class="font-bold text-gray-700">Kehadiran Hari Ini</h3>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse">
-                                <thead>
-                                    <tr class="bg-gray-100 text-gray-600 text-xs uppercase tracking-wider">
-                                        <th class="p-3 border-b">ID / Nama</th>
-                                        <th class="p-3 border-b">Daftar Masuk</th>
-                                        <th class="p-3 border-b">Status Semasa</th>
-                                        <th class="p-3 border-b">Tugas Luar</th>
-                                        <th class="p-3 border-b">Tamat Tugas</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr v-for="record in adminRecords" :key="record.id" class="border-b hover:bg-gray-50">
-                                        <td class="p-3">
-                                            <p class="font-bold text-sm text-gray-800">{{ record.name }}</p>
-                                            <p class="text-xs text-gray-500">{{ record.id }}</p>
-                                        </td>
-                                        <td class="p-3 text-sm text-gray-700">{{ record.timeIn }}</td>
-                                        <td class="p-3">
-                                            <span :class="`px-2 py-1 rounded text-xs font-bold ${statusColorMap[record.status]}`">
-                                                {{ statusTextMap[record.status] }}
-                                            </span>
-                                        </td>
-                                        <td class="p-3 text-xs text-gray-600">
-                                            <div v-if="record.latestDep">Keluar: {{ record.latestDep }}</div>
-                                            <div v-if="record.latestRet">Masuk: {{ record.latestRet }}</div>
-                                        </td>
-                                        <td class="p-3 text-sm text-gray-700">{{ record.timeOut || '-' }}</td>
-                                    </tr>
-                                    <tr v-if="adminRecords.length === 0">
-                                        <td colspan="5" class="p-8 text-center text-gray-500">Tiada rekod kehadiran dijumpai untuk hari ini.</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Teacher Management (Basic) -->
-                    <div class="bg-white rounded-xl shadow-sm p-6">
-                        <h3 class="font-bold text-gray-700 mb-4">Pengurusan Guru (Pendaftaran Ringkas)</h3>
-                        <div class="flex gap-4 items-end">
-                            <div class="flex-1">
-                                <label class="block text-xs font-medium text-gray-700 mb-1">ID Staf</label>
-                                <input v-model="newTeacher.id" type="text" class="w-full px-3 py-2 rounded border focus:ring-blue-500">
-                            </div>
-                            <div class="flex-1">
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Nama Penuh</label>
-                                <input v-model="newTeacher.name" type="text" class="w-full px-3 py-2 rounded border focus:ring-blue-500">
-                            </div>
-                            <button @click="registerTeacher" :disabled="isSubmitting || !newTeacher.id || !newTeacher.name" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium disabled:opacity-50">Daftar</button>
-                        </div>
-                    </div>
-                </div>
-            </transition>
-        </main>
-
-        <!-- Off Campus Modal -->
-        <div v-if="showOffCampusModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-            <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl transform transition-all">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-bold text-gray-800">Maklumat Tugas Luar</h3>
-                    <button @click="showOffCampusModal = false" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button>
-                </div>
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Destinasi / Lokasi</label>
-                        <input v-model="offCampusForm.destination" type="text" placeholder="PPD, JPN, Klinik..." class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Tujuan Urusan</label>
-                        <textarea v-model="offCampusForm.reason" rows="2" placeholder="Mesyuarat, Rawatan, Kursus..." class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500"></textarea>
-                    </div>
-                    <div class="bg-amber-50 p-3 rounded-lg border border-amber-200">
-                        <p class="text-xs text-amber-800"><i class="fas fa-info-circle mr-1"></i> Sila pastikan anda masih berada di dalam kawasan sekolah sebelum menekan butang hantar.</p>
-                    </div>
-                    <button @click="submitOffCampus" :disabled="isSubmitting || !offCampusForm.destination || !offCampusForm.reason" class="w-full bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white font-bold py-3 rounded-lg transition">
-                        <i v-if="isSubmitting" class="fas fa-spinner fa-spin mr-2"></i> Hantar & Mula Perjalanan
-                    </button>
-                </div>
-            </div>
+  <div id="app" class="flex-grow flex flex-col h-full w-full max-w-5xl mx-auto bg-white shadow-xl overflow-hidden print-container">
+    
+    <!-- HEADER -->
+    <header class="bg-blue-800 text-white p-4 shadow-md flex justify-between items-center z-10 no-print">
+      <div class="flex items-center gap-3">
+        <i class="fas fa-school text-2xl"></i>
+        <div>
+          <h1 class="text-lg md:text-xl font-bold leading-tight">e-Hadir SRATI</h1>
+          <p class="text-xs text-blue-200">Sistem Kehadiran & Pergerakan Staf</p>
         </div>
+      </div>
+      <div v-if="view !== 'login'" class="text-right">
+        <button @click="logout" class="bg-red-500 hover:bg-red-600 text-white text-sm px-3 py-1.5 rounded transition shadow">
+          <i class="fas fa-sign-out-alt mr-1"></i> Log Keluar
+        </button>
+      </div>
+    </header>
+
+    <!-- LOADING OVERLAY -->
+    <div v-if="isLoading" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex flex-col items-center justify-center text-white no-print">
+      <i class="fas fa-circle-notch fa-spin text-5xl mb-4"></i>
+      <p class="text-lg font-semibold">{{ loadingMsg }}</p>
     </div>
 
-    <script>
-        const { createApp } = Vue;
+    <!-- MAIN CONTENT -->
+    <main class="flex-grow overflow-y-auto p-4 md:p-6 bg-gray-50 relative">
 
-        // Device Fingerprinting / UUID Generation
-        function getDeviceId() {
-            let id = localStorage.getItem('ehadir_device_id');
-            if (!id) {
-                // Generate simple UUID fallback for older browsers
-                id = crypto.randomUUID ? crypto.randomUUID() : 'dev-' + Math.random().toString(36).substring(2, 15);
-                localStorage.setItem('ehadir_device_id', id);
-            }
-            return id;
+      <!-- ================= LOG MASUK ================= -->
+      <transition name="fade" mode="out-in">
+        <div v-if="view === 'login'" class="max-w-md mx-auto mt-8">
+          
+          <div class="text-center mb-8">
+            <div class="inline-block bg-blue-100 p-4 rounded-full mb-3 shadow-inner">
+              <i class="fas fa-fingerprint text-5xl text-blue-600"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800">Selamat Datang</h2>
+            <p class="text-gray-500 text-sm">Sila log masuk untuk meneruskan</p>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+            <!-- TABS -->
+            <div class="flex border-b border-gray-200 bg-gray-50">
+              <button @click="loginType = 'teacher'" :class="{'bg-white font-bold text-blue-600 border-b-2 border-blue-600': loginType === 'teacher', 'text-gray-500 hover:text-gray-700': loginType === 'admin'}" class="flex-1 py-3 text-sm transition text-center">
+                <i class="fas fa-chalkboard-teacher mr-1"></i> Guru / Staf
+              </button>
+              <button @click="loginType = 'admin'" :class="{'bg-white font-bold text-blue-600 border-b-2 border-blue-600': loginType === 'admin', 'text-gray-500 hover:text-gray-700': loginType === 'teacher'}" class="flex-1 py-3 text-sm transition text-center">
+                <i class="fas fa-user-shield mr-1"></i> Admin
+              </button>
+            </div>
+
+            <div class="p-6">
+              <!-- LOGIN GURU -->
+              <div v-if="loginType === 'teacher'">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Pilih Nama Anda</label>
+                <div class="relative">
+                  <select v-model="selectedStaff" @change="loginTeacher" class="w-full border border-gray-300 rounded-lg p-3 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                    <option value="" disabled selected>-- Sila Pilih Nama --</option>
+                    <option v-for="staff in staffList" :key="staff.id" :value="staff.id">
+                      {{ staff.name }} ({{ staff.id }})
+                    </option>
+                  </select>
+                  <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                    <i class="fas fa-chevron-down"></i>
+                  </div>
+                </div>
+                <p class="text-xs text-gray-400 mt-3 flex items-center">
+                  <i class="fas fa-info-circle mr-1"></i> Memilih nama akan mendaftar masuk secara automatik.
+                </p>
+              </div>
+
+              <!-- LOGIN ADMIN -->
+              <form v-if="loginType === 'admin'" @submit.prevent="loginAdmin">
+                <div class="mb-4">
+                  <label class="block text-sm font-semibold text-gray-700 mb-1">ID Pengguna</label>
+                  <input type="text" v-model="adminUser" required class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Contoh: admin">
+                </div>
+                <div class="mb-5">
+                  <label class="block text-sm font-semibold text-gray-700 mb-1">Kata Laluan</label>
+                  <input type="password" v-model="adminPass" required class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="••••••••">
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-md transition">
+                  Log Masuk Admin
+                </button>
+              </form>
+            </div>
+            
+            <div v-if="demoMode" class="bg-yellow-100 p-2 text-center text-xs text-yellow-700 font-semibold border-t border-yellow-200">
+              <i class="fas fa-exclamation-triangle"></i> Mod Demo (Pelayan luar talian)
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= PAPAN PEMUKA GURU ================= -->
+        <div v-else-if="view === 'teacher'" class="max-w-md mx-auto">
+          
+          <div class="bg-white rounded-xl shadow p-5 mb-5 border-l-4 border-blue-500">
+            <h2 class="text-xl font-bold text-gray-800">{{ currentUser.name }}</h2>
+            <p class="text-sm text-gray-500">ID: {{ currentUser.id }}</p>
+            <div class="mt-3 flex justify-between items-center bg-gray-50 p-3 rounded border">
+              <div>
+                <p class="text-xs text-gray-400 font-semibold uppercase">Masa Semasa</p>
+                <p class="text-lg font-bold text-blue-800">{{ currentTime }}</p>
+              </div>
+              <div class="text-right">
+                <p class="text-xs text-gray-400 font-semibold uppercase">Status</p>
+                <span class="inline-block px-2 py-1 rounded text-xs font-bold" :class="statusColorClass(teacherState)">
+                  {{ statusText(teacherState) }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- KAD LOKASI GPS -->
+          <div class="bg-white rounded-xl shadow p-4 mb-5">
+            <h3 class="text-sm font-bold text-gray-700 mb-2 border-b pb-1">Pengesahan Lokasi GPS</h3>
+            <div class="flex items-center gap-3 mt-3">
+              <div class="rounded-full h-10 w-10 flex items-center justify-center text-white" :class="location.valid ? 'bg-green-500' : 'bg-red-500'">
+                <i class="fas" :class="location.valid ? 'fa-map-marker-alt' : 'fa-times-circle'"></i>
+              </div>
+              <div class="flex-1">
+                <p class="text-sm font-semibold" :class="location.valid ? 'text-green-700' : 'text-red-600'">{{ location.status }}</p>
+                <p v-if="location.distance !== null" class="text-xs text-gray-500">Jarak: {{ location.distance }} meter dari sekolah</p>
+              </div>
+              <button @click="initGPS" class="p-2 text-blue-500 bg-blue-50 rounded-full hover:bg-blue-100 transition">
+                <i class="fas fa-sync-alt"></i>
+              </button>
+            </div>
+            <p v-if="!location.valid && location.distance !== null" class="text-xs text-red-500 mt-2 bg-red-50 p-2 rounded">
+              Anda berada di luar zon 200m sekolah. Sila hampiri kawasan sekolah untuk mendaftar kehadiran harian.
+            </p>
+          </div>
+
+          <!-- TINDAKAN UTAMA -->
+          <div class="grid grid-cols-1 gap-3">
+            
+            <!-- Daftar Masuk -->
+            <button v-if="teacherState === 'NOT_CHECKED_IN'" @click="performAction('checkIn')" :disabled="!location.valid" :class="!location.valid ? 'bg-gray-300 cursor-not-allowed text-gray-500' : 'bg-green-600 hover:bg-green-700 text-white shadow-md'" class="w-full p-4 rounded-xl font-bold flex flex-col items-center justify-center transition h-24">
+              <i class="fas fa-sign-in-alt text-2xl mb-1"></i>
+              DAFTAR MASUK HARI INI
+            </button>
+
+            <!-- Berkursus / Bengkel (Hanya jika belum check-in/kursus) -->
+            <button v-if="teacherState === 'NOT_CHECKED_IN'" @click="performAction('startCourse')" class="w-full p-4 rounded-xl font-bold flex flex-col items-center justify-center transition h-24 bg-purple-600 hover:bg-purple-700 text-white shadow-md mt-2">
+              <i class="fas fa-chalkboard-teacher text-2xl mb-1"></i>
+              REKOD BERKURSUS / BENGKEL
+            </button>
+
+            <!-- Urusan Luar -->
+            <div v-if="teacherState === 'PRESENT' || teacherState === 'RETURNED'" class="bg-white rounded-xl shadow p-4 border border-blue-100">
+              <h3 class="text-sm font-bold text-gray-700 mb-3 text-center">Keluar Atas Urusan Rasmi</h3>
+              <input type="text" v-model="offCampus.destination" placeholder="Destinasi..." class="w-full mb-2 border border-gray-300 rounded p-2 text-sm focus:ring-1 focus:ring-blue-500">
+              <input type="text" v-model="offCampus.reason" placeholder="Tujuan..." class="w-full mb-3 border border-gray-300 rounded p-2 text-sm focus:ring-1 focus:ring-blue-500">
+              <button @click="performAction('startOffCampus')" :disabled="!location.valid || !offCampus.destination" :class="(!location.valid || !offCampus.destination) ? 'bg-gray-300 text-gray-500' : 'bg-yellow-500 hover:bg-yellow-600 text-white'" class="w-full py-2 rounded font-bold transition shadow">
+                <i class="fas fa-car-side mr-1"></i> MULA URUSAN LUAR
+              </button>
+            </div>
+
+            <!-- Kembali -->
+            <button v-if="teacherState === 'OFF_CAMPUS'" @click="performAction('returnSchool')" :disabled="!location.valid" :class="!location.valid ? 'bg-gray-300 text-gray-500' : 'bg-blue-500 hover:bg-blue-600 text-white shadow-md'" class="w-full p-4 rounded-xl font-bold flex flex-col items-center justify-center transition h-24">
+              <i class="fas fa-undo-alt text-2xl mb-1"></i>
+              REKOD KEMBALI KE SEKOLAH
+            </button>
+
+            <!-- Pulang -->
+            <button v-if="teacherState === 'PRESENT' || teacherState === 'RETURNED'" @click="performAction('checkOut')" :disabled="!location.valid" :class="!location.valid ? 'bg-gray-300 text-gray-500' : 'bg-red-500 hover:bg-red-600 text-white shadow-md'" class="w-full p-4 rounded-xl font-bold flex flex-col items-center justify-center transition h-24 mt-4 border-2 border-red-200">
+              <i class="fas fa-sign-out-alt text-2xl mb-1"></i>
+              DAFTAR PULANG (TAMAT TUGAS)
+            </button>
+
+            <!-- Telah Selesai / Sedang Kursus -->
+            <div v-if="teacherState === 'COMPLETED'" class="bg-green-100 text-green-800 p-6 rounded-xl text-center shadow border border-green-300">
+              <i class="fas fa-check-circle text-4xl mb-2"></i>
+              <h3 class="font-bold text-lg">Tugas Selesai</h3>
+              <p class="text-sm">Terima kasih. Anda telah mendaftar pulang untuk hari ini.</p>
+            </div>
+            
+            <div v-if="teacherState === 'COURSE'" class="bg-purple-100 text-purple-800 p-6 rounded-xl text-center shadow border border-purple-300">
+              <i class="fas fa-chalkboard-teacher text-4xl mb-2"></i>
+              <h3 class="font-bold text-lg">Sedang Berkursus</h3>
+              <p class="text-sm">Kehadiran anda didaftarkan sebagai berkursus/bengkel untuk hari ini.</p>
+            </div>
+
+          </div>
+
+          <!-- NOTA/MAKLUMAN MESEJ (Custom Alert/Toast) -->
+          <div v-if="sysMessage" class="mt-5 p-3 rounded-lg text-sm border font-semibold flex justify-between items-center" :class="sysMessage.type === 'error' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-green-50 text-green-700 border-green-200'">
+            <span><i :class="sysMessage.type === 'error' ? 'fas fa-exclamation-triangle' : 'fas fa-check-circle'" class="mr-2"></i> {{ sysMessage.text }}</span>
+            <button @click="sysMessage = null" class="text-gray-400 hover:text-gray-700"><i class="fas fa-times"></i></button>
+          </div>
+        </div>
+
+        <!-- ================= PAPAN PEMUKA ADMIN ================= -->
+        <div v-else-if="view === 'admin'" class="w-full">
+          
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 no-print gap-4">
+            <div>
+              <h2 class="text-2xl font-bold text-gray-800">Panel Pentadbir</h2>
+              <p class="text-gray-500">Pengurusan Kehadiran & Data Staf</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <input type="date" v-model="adminDate" @change="fetchAdminData" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
+              <button @click="fetchAdminData" class="bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-2 rounded-lg text-sm font-semibold transition">
+                <i class="fas fa-sync-alt mr-1"></i> Segar Semula
+              </button>
+              <button @click="printReport" class="bg-gray-800 text-white hover:bg-gray-900 px-3 py-2 rounded-lg text-sm font-semibold transition shadow">
+                <i class="fas fa-print mr-1"></i> Cetak
+              </button>
+            </div>
+          </div>
+
+          <!-- TAB NAVIGASI ADMIN -->
+          <div class="flex overflow-x-auto border-b border-gray-200 mb-6 bg-white rounded-t-lg shadow-sm no-print">
+            <button @click="adminTab = 'hadir'" :class="adminTab === 'hadir' ? 'border-b-2 border-blue-600 text-blue-600 font-bold' : 'text-gray-500'" class="px-5 py-3 text-sm transition whitespace-nowrap">
+              <i class="fas fa-users mr-1"></i> Rekod Harian
+            </button>
+            <button @click="adminTab = 'pergerakan'" :class="adminTab === 'pergerakan' ? 'border-b-2 border-blue-600 text-blue-600 font-bold' : 'text-gray-500'" class="px-5 py-3 text-sm transition whitespace-nowrap">
+              <i class="fas fa-route mr-1"></i> Log Pergerakan & Kursus
+            </button>
+            <button @click="adminTab = 'staf'" :class="adminTab === 'staf' ? 'border-b-2 border-blue-600 text-blue-600 font-bold' : 'text-gray-500'" class="px-5 py-3 text-sm transition whitespace-nowrap">
+              <i class="fas fa-user-cog mr-1"></i> Pengurusan Staf
+            </button>
+          </div>
+
+          <!-- SUMMARY CARDS (Paparan di semua tab cetak kecuali staf) -->
+          <div v-if="adminTab !== 'staf'" class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+            <div class="bg-white p-3 rounded-lg shadow border-l-4 border-blue-500">
+              <p class="text-xs text-gray-500 uppercase font-bold">Jum. Staf</p>
+              <p class="text-xl font-bold">{{ adminStats.total }}</p>
+            </div>
+            <div class="bg-white p-3 rounded-lg shadow border-l-4 border-green-500">
+              <p class="text-xs text-gray-500 uppercase font-bold">Hadir</p>
+              <p class="text-xl font-bold text-green-600">{{ adminStats.present }}</p>
+            </div>
+            <div class="bg-white p-3 rounded-lg shadow border-l-4 border-purple-500">
+              <p class="text-xs text-gray-500 uppercase font-bold">Kursus</p>
+              <p class="text-xl font-bold text-purple-600">{{ adminStats.course }}</p>
+            </div>
+            <div class="bg-white p-3 rounded-lg shadow border-l-4 border-yellow-500">
+              <p class="text-xs text-gray-500 uppercase font-bold">Luar (Tugas)</p>
+              <p class="text-xl font-bold text-yellow-600">{{ adminStats.offcampus }}</p>
+            </div>
+            <div class="bg-white p-3 rounded-lg shadow border-l-4 border-red-500">
+              <p class="text-xs text-gray-500 uppercase font-bold">Tamat (Pulang)</p>
+              <p class="text-xl font-bold text-red-600">{{ adminStats.completed }}</p>
+            </div>
+          </div>
+
+          <!-- TAB: REKOD HARIAN -->
+          <div v-if="adminTab === 'hadir'" class="bg-white rounded-lg shadow overflow-hidden">
+            <div class="p-4 bg-gray-50 border-b border-gray-200">
+              <h3 class="font-bold text-gray-700 text-lg">Jadual Kehadiran: {{ adminDate }}</h3>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse text-sm">
+                <thead>
+                  <tr class="bg-gray-100 text-gray-600 uppercase text-xs">
+                    <th class="p-3 border-b">ID</th>
+                    <th class="p-3 border-b">Nama</th>
+                    <th class="p-3 border-b">Status</th>
+                    <th class="p-3 border-b">Waktu Masuk</th>
+                    <th class="p-3 border-b">Waktu Pulang</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-if="adminLogs.length === 0">
+                    <td colspan="5" class="p-6 text-center text-gray-500">Tiada rekod kehadiran untuk tarikh ini.</td>
+                  </tr>
+                  <tr v-for="log in adminLogs" :key="log.id" class="border-b hover:bg-gray-50 transition">
+                    <td class="p-3 font-mono text-xs text-gray-600">{{ log.id }}</td>
+                    <td class="p-3 font-semibold">{{ log.name }}</td>
+                    <td class="p-3">
+                      <span class="px-2 py-1 rounded text-xs font-bold" :class="statusColorClass(log.status)">
+                        {{ statusText(log.status) }}
+                      </span>
+                    </td>
+                    <td class="p-3">{{ formatTime(log.timeIn) }}</td>
+                    <td class="p-3">{{ formatTime(log.timeOut) || '-' }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TAB: PERGERAKAN -->
+          <div v-if="adminTab === 'pergerakan'" class="bg-white rounded-lg shadow overflow-hidden">
+            <div class="p-4 bg-gray-50 border-b border-gray-200">
+              <h3 class="font-bold text-gray-700 text-lg">Log Pergerakan Keluar & Kursus</h3>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse text-sm">
+                <thead>
+                  <tr class="bg-gray-100 text-gray-600 uppercase text-xs">
+                    <th class="p-3 border-b">Nama</th>
+                    <th class="p-3 border-b">Status</th>
+                    <th class="p-3 border-b">Masa Keluar</th>
+                    <th class="p-3 border-b">Masa Kembali</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-if="adminMovementLogs.length === 0">
+                    <td colspan="4" class="p-6 text-center text-gray-500">Tiada rekod pergerakan di luar sekolah / kursus.</td>
+                  </tr>
+                  <tr v-for="log in adminMovementLogs" :key="log.id" class="border-b hover:bg-gray-50">
+                    <td class="p-3 font-semibold">{{ log.name }} <br><span class="text-xs text-gray-400 font-mono">{{log.id}}</span></td>
+                    <td class="p-3">
+                      <span class="px-2 py-1 rounded text-xs font-bold" :class="statusColorClass(log.status)">
+                        {{ statusText(log.status) }}
+                      </span>
+                    </td>
+                    <td class="p-3 text-red-600">{{ formatTime(log.latestDep) || '-' }}</td>
+                    <td class="p-3 text-green-600">{{ formatTime(log.latestRet) || '-' }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TAB: PENGURUSAN STAF (MUAT NAIK) -->
+          <div v-if="adminTab === 'staf'" class="no-print">
+            <div class="bg-white rounded-lg shadow p-6 border-t-4 border-blue-500">
+              <h3 class="font-bold text-gray-800 text-lg mb-2"><i class="fas fa-file-upload mr-2 text-blue-600"></i>Muat Naik Pukal Maklumat Staf</h3>
+              <p class="text-sm text-gray-600 mb-4">Muat naik fail jadual (seperti CSV atau TXT) yang mengandungi lajur <strong>ID Staf</strong> dan <strong>Nama</strong> untuk mendaftarkan senarai guru ke dalam Google Sheets secara automatik.</p>
+              
+              <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50 hover:bg-gray-100 transition">
+                <input type="file" @change="handleFileUpload" accept=".csv, .txt" id="fileUpload" class="hidden">
+                <label for="fileUpload" class="cursor-pointer flex flex-col items-center">
+                  <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-3"></i>
+                  <span class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow mb-2">Pilih Fail (CSV / TXT)</span>
+                  <span class="text-xs text-gray-500">{{ selectedFileName || 'Tiada fail dipilih' }}</span>
+                </label>
+              </div>
+
+              <div v-if="parsedStaffList.length > 0" class="mt-4 border rounded overflow-hidden">
+                <div class="bg-green-100 text-green-800 p-2 text-sm font-bold flex justify-between items-center">
+                  <span>Berjaya mengekstrak {{ parsedStaffList.length }} rekod.</span>
+                  <button @click="uploadStaffData" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs shadow">Muat Naik ke Sistem</button>
+                </div>
+                <div class="max-h-48 overflow-y-auto bg-white p-2 text-xs font-mono">
+                  <div v-for="(s, idx) in parsedStaffList.slice(0,5)" :key="idx" class="border-b py-1">{{ s.id }} - {{ s.name }}</div>
+                  <div v-if="parsedStaffList.length > 5" class="py-1 text-gray-400 italic">... dan {{ parsedStaffList.length - 5 }} lagi</div>
+                </div>
+              </div>
+
+              <!-- Mesej Status Admin -->
+              <div v-if="sysMessage" class="mt-4 p-3 rounded-lg text-sm border font-semibold flex justify-between items-center" :class="sysMessage.type === 'error' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-green-50 text-green-700 border-green-200'">
+                <span><i :class="sysMessage.type === 'error' ? 'fas fa-exclamation-triangle' : 'fas fa-check-circle'" class="mr-2"></i> {{ sysMessage.text }}</span>
+                <button @click="sysMessage = null" class="text-gray-400"><i class="fas fa-times"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </transition>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t p-3 text-center text-xs text-gray-400 no-print">
+      &copy; 2026 SRATI - Sistem Pengurusan Kehadiran Pintar
+    </footer>
+  </div>
+
+  <script>
+    const app = Vue.createApp({
+      data() {
+        return {
+          // Hardcoded URL GAS
+          gasUrl: 'https://script.google.com/macros/s/AKfycbzqwlVFkcqECI9Ln2-_IGN-pTHVpx-Y5bJ3hTpoHECt2844h5Ma3rn6RvTav-05KYNFfg/exec',
+          
+          view: 'login', // login, teacher, admin
+          loginType: 'teacher', 
+          
+          // Data Login Admin
+          adminUser: '',
+          adminPass: '',
+          adminToken: '',
+
+          // Data Login Guru
+          selectedStaff: '',
+          
+          // Senarai 47 Staf Hardcoded dari MAKLUMAT STAF_2 (Sebagai paparan UI)
+          staffList: [
+            { id: 'SRATI001', name: 'MOHD NASRULLAH BIN AZIZAN' },
+            { id: 'SRATI002', name: 'MOHD ELYAS BIN MOHD BAKRI' },
+            { id: 'SRATI003', name: 'SITI HAJAR BINTI MESRAH' },
+            { id: 'SRATI004', name: 'HALIMAH BINTI ZAINON' },
+            { id: 'SRATI005', name: 'AHMAD ZAIM AZHAN BIN AHMAD ZAINALABIDIN' },
+            { id: 'SRATI006', name: 'ALYA SOFEA BINTI SAUFIE' },
+            { id: 'SRATI007', name: 'FARIDAH BINTI AHMAD' },
+            { id: 'SRATI008', name: 'KHAIRUNNISA BINTI ZULKIFLI' },
+            { id: 'SRATI009', name: 'MUHAMAD FAKRUL SYAKİRİN BİN MOHD ROSLAN' },
+            { id: 'SRATI010', name: 'MUHAMMAD AZHAD BIN SHAIFUL ASGHAR' },
+            { id: 'SRATI011', name: 'MUHAMMAD HAIMAN BIN MD RAZALLI' },
+            { id: 'SRATI012', name: 'MUHAMMAD HIFZHAN HANAFI BIN AHMAD ZAILANI' },
+            { id: 'SRATI013', name: 'MUHAMMAD RIDZUAN BIN MOHAMMAD BASHA' },
+            { id: 'SRATI014', name: 'MUHAMMAD SYAHMI BIN ROSLEY' },
+            { id: 'SRATI015', name: 'NOR ALBADRIAH BINTI ISMAIL' },
+            { id: 'SRATI016', name: 'NOR AQILAH BINTI AHMAD' },
+            { id: 'SRATI017', name: 'NOR SAFFINAS BINTI ZAHARI' },
+            { id: 'SRATI018', name: 'NORA SHATIRAH BINTI AHMAD KHATIB' },
+            { id: 'SRATI019', name: 'NUR FAIZAH FARHANAH BINTI MEOR MAZLI' },
+            { id: 'SRATI020', name: 'NURAMIRA ATHIRA BINTI MOHAMAD NOOR' },
+            { id: 'SRATI021', name: 'NURSYAZLJANA SYAZIRA BINTI ROMIZI' },
+            { id: 'SRATI022', name: 'SITI KHODIJAH BINTI MOHAMMAD LAZIM' },
+            { id: 'SRATI023', name: 'WAN SAMIHAH BINTI WAN ABDUL MANAFF' },
+            { id: 'SRATI024', name: 'AMIRA BINTI MOHD SOBRI' },
+            { id: 'SRATI025', name: 'FAZLINA SHAHIDA BUNTI AHAMAD' },
+            { id: 'SRATI026', name: 'MOHAMMAD AIZUDDIN ASRAF BIN AHMAD' },
+            { id: 'SRATI027', name: 'MOHD HIDAYAT BIN AZIZAN' },
+            { id: 'SRATI028', name: 'MUHAMMAD ADIL BIN ADLAN' },
+            { id: 'SRATI029', name: 'MUHAMMAD FAIZAL BIN MOHD NOOR' },
+            { id: 'SRATI030', name: 'MUHAMMAD IKRIMAH BIN IDRIS' },
+            { id: 'SRATI031', name: 'NUR AQILAH BINTI NOOR AZMI' },
+            { id: 'SRATI032', name: 'NUR SALAM BIN MOHD ZAWI' },
+            { id: 'SRATI033', name: 'NURUL AQILAH BINTI BASRI' },
+            { id: 'SRATI034', name: 'NURUL SALASIAH BINTI YASIN MAT' },
+            { id: 'SRATI035', name: 'ABDULLAH BIN YAHAYA' },
+            { id: 'SRATI036', name: 'KAMALIAH BINTI ALIFIAH' },
+            { id: 'SRATI037', name: 'NOOR HAYATI BINTI HARUN' },
+            { id: 'SRATI038', name: 'NUR SYAHADAH BINTI ZAINUL KAMAL' },
+            { id: 'SRATI039', name: 'RAFIZATUN SAADIAH BINTI KARIM' },
+            { id: 'SRATI040', name: 'ROHAIDA BINTI ABD RAZAK' },
+            { id: 'SRATI041', name: 'SALINA BINTI MOHAMED KHİR' },
+            { id: 'SRATI042', name: 'ZAKIAH BINTI MOKHTAR' },
+            { id: 'SRATI043', name: 'NURUL IFFAH BINTI CHE MOHAMED' },
+            { id: 'SRATI044', name: 'KHAIRUL BARIAH BINTI TAJUL HALIM' },
+            { id: 'SRATI045', name: 'NORAINI BINTIMAT ISA' },
+            { id: 'SRATI046', name: 'NORMAISARAH BINTI OTHMAN' },
+            { id: 'SRATI047', name: 'ROSINITA BINTI LEMAN' }
+          ],
+
+          // State Semasa Guru
+          currentUser: null,
+          teacherState: 'NOT_CHECKED_IN',
+          offCampus: { destination: '', reason: '' },
+          
+          // GPS & Lokasi
+          location: {
+            lat: null,
+            lng: null,
+            accuracy: null,
+            valid: false,
+            distance: null,
+            status: 'Menunggu Akses GPS...'
+          },
+          schoolCoords: { lat: 4.6738, lng: 101.1578 },
+          
+          // UI Helpers
+          isLoading: false,
+          loadingMsg: '',
+          sysMessage: null, // {type: 'success'|'error', text: ''}
+          currentTime: '',
+          clockInterval: null,
+          
+          // Admin Data
+          adminTab: 'hadir',
+          adminDate: new Date().toLocaleDateString('en-CA'), // Format yyyy-mm-dd
+          adminLogs: [],
+          adminStats: { total: 0, present: 0, offcampus: 0, course: 0, completed: 0 },
+          selectedFileName: '',
+          parsedStaffList: [],
+          
+          // Demo Mode
+          demoMode: false
+        };
+      },
+      computed: {
+        adminMovementLogs() {
+          return this.adminLogs.filter(l => l.status === 'OFF_CAMPUS' || l.status === 'COURSE' || l.status === 'RETURNED');
         }
+      },
+      mounted() {
+        this.updateClock();
+        this.clockInterval = setInterval(this.updateClock, 1000);
+      },
+      beforeUnmount() {
+        clearInterval(this.clockInterval);
+      },
+      methods: {
+        updateClock() {
+          this.currentTime = new Date().toLocaleTimeString('ms-MY', { hour12: false });
+        },
+        showMessage(text, type = 'success') {
+          this.sysMessage = { text, type };
+          setTimeout(() => { this.sysMessage = null; }, 5000);
+        },
+        
+        // ---- SISTEM TERAS (API COMMUNICATION) ----
+        async apiCall(payload) {
+          try {
+            const response = await fetch(this.gasUrl, {
+              method: 'POST',
+              body: JSON.stringify(payload),
+              headers: { 'Content-Type': 'text/plain' } // Hindari CORS Options Preflight
+            });
+            return await response.json();
+          } catch (e) {
+            console.error("API Call Failed:", e);
+            // Fallback: Mod Demo
+            this.demoMode = true;
+            return this.mockApi(payload);
+          }
+        },
+        
+        // Mock API untuk Demo
+        mockApi(payload) {
+          const t = new Date().toISOString();
+          if (payload.action === 'adminLogin') {
+            if (payload.username === 'admin' && payload.password === 'ehadiradmin2001') return { success: true, token: 'demo-token' };
+            return { success: false, message: 'Kredensial salah (Demo)' };
+          }
+          if (payload.action === 'login') {
+            const staff = this.staffList.find(s => s.id === payload.staffId);
+            if (!staff) return { success: false, message: 'ID tidak dijumpai.' };
+            return { success: true, user: { staffId: staff.id, name: staff.name }, state: 'NOT_CHECKED_IN' };
+          }
+          if (payload.action === 'getAdminData') {
+            return { 
+              success: true, 
+              stats: { total: 47, present: 5, offcampus: 1, course: 2, completed: 1 },
+              attendance: [
+                {id: 'SRATI001', name: 'MOHD NASRULLAH BIN AZIZAN', status: 'PRESENT', timeIn: t, timeOut: ''},
+                {id: 'SRATI002', name: 'MOHD ELYAS BIN MOHD BAKRI', status: 'COURSE', timeIn: t, timeOut: ''},
+                {id: 'SRATI003', name: 'SITI HAJAR BINTI MESRAH', status: 'OFF_CAMPUS', timeIn: t, timeOut: '', latestDep: t}
+              ]
+            };
+          }
+          if (payload.action === 'bulkRegister') return { success: true, message: 'Berjaya muat naik pukal (Demo)' };
+          
+          return { success: true, message: 'Tindakan berjaya direkod (Mod Demo)', time: t, distance: 50 };
+        },
 
-        createApp({
-            data() {
-                return {
-                    currentView: 'config', // config, login, teacher, admin
-                    loginRole: 'teacher',
-                    tempGasUrl: '',
-                    gasUrl: localStorage.getItem('GAS_URL') || '',
-                    deviceId: getDeviceId(),
-                    
-                    // User Data
-                    user: null,
-                    adminToken: null,
-                    
-                    // Forms
-                    loginStaffId: '',
-                    adminUsername: '',
-                    adminPassword: '',
-                    newTeacher: { id: '', name: '' },
-                    offCampusForm: { destination: '', reason: '' },
-                    
-                    // State
-                    attendanceState: 'NOT_CHECKED_IN',
-                    attendanceRecord: null,
-                    
-                    // GPS
-                    location: { lat: null, lng: null, accuracy: null, distance: null },
-                    isLocating: false,
-                    locationValid: false,
-                    
-                    // Admin Data
-                    adminStats: null,
-                    adminRecords: [],
-                    
-                    // UI State
-                    currentTime: '',
-                    currentDate: '',
-                    isLoading: false,
-                    isSubmitting: false,
-                    showOffCampusModal: false,
-                    notification: { show: false, message: '', type: 'info' },
-                    
-                    // Mappings
-                    statusTextMap: {
-                        'NOT_CHECKED_IN': 'Belum Daftar Masuk',
-                        'PRESENT': 'Hadir di Sekolah',
-                        'OFF_CAMPUS': 'Urusan Luar / Rasmi',
-                        'RETURNED': 'Kembali ke Sekolah',
-                        'COMPLETED': 'Tamat Tugas'
-                    },
-                    statusColorMap: {
-                        'NOT_CHECKED_IN': 'bg-gray-100 text-gray-600',
-                        'PRESENT': 'bg-emerald-100 text-emerald-800',
-                        'OFF_CAMPUS': 'bg-amber-100 text-amber-800',
-                        'RETURNED': 'bg-indigo-100 text-indigo-800',
-                        'COMPLETED': 'bg-slate-100 text-slate-800'
-                    }
-                }
+        // ---- LOKASI (GPS) ----
+        initGPS() {
+          this.location.status = 'Menyemak GPS...';
+          this.location.valid = false;
+          
+          if (!navigator.geolocation) {
+            this.location.status = 'Pelayar tidak menyokong GPS.';
+            return;
+          }
+
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
+              this.location.lat = pos.coords.latitude;
+              this.location.lng = pos.coords.longitude;
+              this.location.accuracy = pos.coords.accuracy;
+              
+              // Kalkulasi jarak Haversine (ke sekolah)
+              const R = 6371e3;
+              const dLat = (this.schoolCoords.lat - this.location.lat) * Math.PI / 180;
+              const dLon = (this.schoolCoords.lng - this.location.lng) * Math.PI / 180;
+              const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(this.location.lat * Math.PI / 180) * Math.cos(this.schoolCoords.lat * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+              const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+              const dist = Math.round(R * c);
+              
+              this.location.distance = dist;
+              
+              if (dist <= 200) {
+                this.location.valid = true;
+                this.location.status = 'Lokasi Disahkan: Dalam Zon Sekolah';
+              } else {
+                this.location.valid = false;
+                this.location.status = 'Luar Zon (Jarak: ' + dist + 'm)';
+                // Semasa demo/testing di luar kawasan sekolah, jadikan ini `true` secara maya jika mahu.
+                // this.location.valid = true; this.location.status = 'Demo: Bypass Zon Sekolah';
+              }
             },
-            mounted() {
-                this.updateClock();
-                setInterval(this.updateClock, 1000);
-                
-                if (this.gasUrl) {
-                    // Check local session
-                    const savedUser = localStorage.getItem('ehadir_user');
-                    if (savedUser) {
-                        this.user = JSON.parse(savedUser);
-                        this.currentView = 'teacher';
-                        this.refreshTeacherState();
-                    } else {
-                        this.currentView = 'login';
-                    }
-                }
+            (err) => {
+              this.location.status = 'Akses GPS Ditolak / Gagal.';
             },
-            methods: {
-                updateClock() {
-                    const now = new Date();
-                    this.currentTime = now.toLocaleTimeString('ms-MY', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                    this.currentDate = now.toLocaleDateString('ms-MY', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-                },
-                showNotify(msg, type = 'success') {
-                    this.notification = { show: true, message: msg, type: type };
-                    setTimeout(() => { this.notification.show = false; }, 5000);
-                },
-                saveConfig() {
-                    if(!this.tempGasUrl) {
-                        this.showNotify('Sila masukkan URL yang sah', 'error');
-                        return;
-                    }
-                    this.gasUrl = this.tempGasUrl;
-                    localStorage.setItem('GAS_URL', this.gasUrl);
-                    this.currentView = 'login';
-                    this.showNotify('Konfigurasi disimpan. Sila log masuk.');
-                },
-                logout() {
-                    localStorage.removeItem('ehadir_user');
-                    this.user = null;
-                    this.adminToken = null;
-                    this.currentView = 'login';
-                    this.attendanceRecord = null;
-                },
-                
-                // --- API SERVICE ---
-                async apiCall(action, payload = {}) {
-                    if(!this.gasUrl) throw new Error("URL Server tidak dikonfigurasi.");
-                    const body = { action, ...payload };
-                    
-                    try {
-                        const res = await fetch(this.gasUrl, {
-                            method: 'POST',
-                            body: JSON.stringify(body)
-                        });
-                        const data = await res.json();
-                        return data;
-                    } catch (e) {
-                        console.error(e);
-                        // Mock fallback for Canvas demonstration if no real backend is deployed yet.
-                        if (e.message === "Failed to fetch" || e.name === "TypeError") {
-                           return this.mockApiFallback(action, payload);
-                        }
-                        throw e;
-                    }
-                },
-                
-                // --- MOCK FALLBACK (Penting untuk visualisasi dalam Canvas) ---
-                mockApiFallback(action, payload) {
-                    console.warn("MENGGUNAKAN MOD DEMO LOKAL (Gagal menyambung ke Google Script)");
-                    return new Promise((resolve) => {
-                        setTimeout(() => {
-                            if(action === 'login') {
-                                resolve({ success: true, user: {staffId: payload.staffId, name: 'Guru Demo'}, state: this.attendanceState, record: this.attendanceRecord });
-                            } else if (action === 'adminLogin') {
-                                resolve({ success: true, token: 'demo-token' });
-                            } else if (['checkIn', 'startOffCampus', 'returnSchool', 'checkOut'].includes(action)) {
-                                const time = new Date().toLocaleTimeString('ms-MY');
-                                resolve({ success: true, message: 'Berjaya (Mod Demo)', time: time, distance: 45 });
-                            } else if (action === 'getAdminData') {
-                                resolve({ success: true, stats: {total: 50, present: 45, offcampus: 2, returned: 1, completed: 0, absent: 2}, attendance: [] });
-                            }
-                        }, 800);
-                    });
-                },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+          );
+        },
+        
+        getDeviceId() {
+          let id = localStorage.getItem('ehadir_device_id');
+          if (!id) {
+            id = 'DEV-' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('ehadir_device_id', id);
+          }
+          return id;
+        },
 
-                // --- AUTHENTICATION ---
-                async handleTeacherLogin() {
-                    if(!this.loginStaffId) return this.showNotify('Masukkan ID Staf', 'error');
-                    this.isLoading = true;
-                    try {
-                        const res = await this.apiCall('login', { staffId: this.loginStaffId, deviceId: this.deviceId });
-                        if(res.success) {
-                            this.user = res.user;
-                            this.attendanceState = res.state;
-                            this.attendanceRecord = res.record || {};
-                            localStorage.setItem('ehadir_user', JSON.stringify(this.user));
-                            this.currentView = 'teacher';
-                            this.requestLocation(); // Get GPS immediately
-                        } else {
-                            this.showNotify(res.message, 'error');
-                        }
-                    } catch(e) {
-                        this.showNotify('Ralat rangkaian. Sila cuba lagi.', 'error');
-                    }
-                    this.isLoading = false;
-                },
-                async refreshTeacherState() {
-                    try {
-                        const res = await this.apiCall('login', { staffId: this.user.staffId, deviceId: this.deviceId });
-                        if(res.success) {
-                            this.attendanceState = res.state;
-                            this.attendanceRecord = res.record || {};
-                        } else {
-                            this.logout();
-                            this.showNotify('Sesi tamat atau peranti tidak sah.', 'error');
-                        }
-                    } catch(e) {}
-                    this.requestLocation();
-                },
-                async handleAdminLogin() {
-                    this.isLoading = true;
-                    try {
-                        const res = await this.apiCall('adminLogin', { username: this.adminUsername, password: this.adminPassword });
-                        if(res.success) {
-                            this.adminToken = res.token;
-                            this.currentView = 'admin';
-                            this.loadAdminData();
-                        } else {
-                            this.showNotify(res.message, 'error');
-                        }
-                    } catch(e) {
-                        this.showNotify('Ralat rangkaian', 'error');
-                    }
-                    this.isLoading = false;
-                },
+        // ---- LOG MASUK ----
+        async loginTeacher() {
+          if (!this.selectedStaff) return;
+          
+          this.isLoading = true;
+          this.loadingMsg = 'Mengesahkan Identiti & Lokasi...';
+          
+          // Mulakan GPS serentak ketika log masuk
+          this.initGPS();
+          
+          const payload = {
+            action: 'login',
+            staffId: this.selectedStaff,
+            deviceId: this.getDeviceId()
+          };
+          
+          const res = await this.apiCall(payload);
+          this.isLoading = false;
+          
+          if (res.success) {
+            this.currentUser = res.user;
+            this.teacherState = res.state;
+            this.view = 'teacher';
+            this.showMessage(`Selamat datang, ${res.user.name}.`);
+          } else {
+            this.selectedStaff = ''; // Reset selection
+            this.showMessage(res.message, 'error');
+          }
+        },
 
-                // --- GPS LOGIC ---
-                requestLocation() {
-                    this.isLocating = true;
-                    this.locationValid = false;
-                    if ("geolocation" in navigator) {
-                        navigator.geolocation.getCurrentPosition(
-                            (pos) => {
-                                this.location.lat = pos.coords.latitude;
-                                this.location.lng = pos.coords.longitude;
-                                this.location.accuracy = pos.coords.accuracy;
-                                // Client side validation estimation (Server enforces true validation)
-                                const dist = this.calculateDistance(pos.coords.latitude, pos.coords.longitude, 4.6738, 101.1578);
-                                this.location.distance = dist;
-                                
-                                if(dist <= 200 && pos.coords.accuracy <= 50) {
-                                    this.locationValid = true;
-                                }
-                                this.isLocating = false;
-                            },
-                            (err) => {
-                                this.isLocating = false;
-                                this.showNotify('Akses GPS dinafikan atau ralat isyarat. Sila hidupkan lokasi.', 'error');
-                            },
-                            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-                        );
-                    } else {
-                        this.isLocating = false;
-                        this.showNotify('Peranti anda tidak menyokong GPS', 'error');
-                    }
-                },
-                calculateDistance(lat1, lon1, lat2, lon2) {
-                    const R = 6371e3; // metres
-                    const φ1 = lat1 * Math.PI/180;
-                    const φ2 = lat2 * Math.PI/180;
-                    const Δφ = (lat2-lat1) * Math.PI/180;
-                    const Δλ = (lon2-lon1) * Math.PI/180;
-                    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2) * Math.sin(Δλ/2);
-                    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-                    return Math.round(R * c);
-                },
+        async loginAdmin() {
+          this.isLoading = true;
+          this.loadingMsg = 'Mengesahkan Pentadbir...';
+          const payload = {
+            action: 'adminLogin',
+            username: this.adminUser,
+            password: this.adminPass
+          };
+          const res = await this.apiCall(payload);
+          this.isLoading = false;
+          
+          if (res.success) {
+            this.adminToken = res.token;
+            this.view = 'admin';
+            this.fetchAdminData();
+          } else {
+            this.showMessage(res.message, 'error');
+          }
+        },
 
-                // --- ATTENDANCE ACTIONS ---
-                async performAction(actionStr) {
-                    if(!this.locationValid) return this.showNotify('Lokasi anda tidak memenuhi syarat radius sekolah (200m).', 'error');
-                    
-                    this.isSubmitting = true;
-                    const payload = {
-                        staffId: this.user.staffId,
-                        name: this.user.name,
-                        deviceId: this.deviceId,
-                        lat: this.location.lat,
-                        lng: this.location.lng,
-                        accuracy: this.location.accuracy
-                    };
+        logout() {
+          this.view = 'login';
+          this.currentUser = null;
+          this.selectedStaff = '';
+          this.adminUser = '';
+          this.adminPass = '';
+          this.adminToken = '';
+        },
 
-                    try {
-                        const res = await this.apiCall(actionStr, payload);
-                        if(res.success) {
-                            this.showNotify(res.message, 'success');
-                            if(!this.attendanceRecord) this.attendanceRecord = {};
-                            
-                            if(actionStr === 'checkIn') {
-                                this.attendanceState = 'PRESENT';
-                                this.attendanceRecord.checkIn = res.time;
-                            } else if (actionStr === 'returnSchool') {
-                                this.attendanceState = 'RETURNED';
-                                this.attendanceRecord.latestRet = res.time;
-                            } else if (actionStr === 'checkOut') {
-                                this.attendanceState = 'COMPLETED';
-                                this.attendanceRecord.checkOut = res.time;
-                            }
-                        } else {
-                            this.showNotify(res.message, 'error');
-                            this.requestLocation(); // force re-verify if server rejected GPS
-                        }
-                    } catch(e) {
-                        this.showNotify('Ralat menyimpan data.', 'error');
-                    }
-                    this.isSubmitting = false;
-                },
-                
-                async submitOffCampus() {
-                    if(!this.locationValid) return this.showNotify('Mesti mula urusan dari kawasan sekolah.', 'error');
-                    this.isSubmitting = true;
-                    
-                    const payload = {
-                        staffId: this.user.staffId,
-                        name: this.user.name,
-                        deviceId: this.deviceId,
-                        lat: this.location.lat,
-                        lng: this.location.lng,
-                        accuracy: this.location.accuracy,
-                        destination: this.offCampusForm.destination,
-                        reason: this.offCampusForm.reason
-                    };
+        // ---- TINDAKAN GURU ----
+        async performAction(actionStr) {
+          if (!this.location.valid && !this.demoMode) {
+            this.showMessage('Sila pastikan anda berada di kawasan sekolah (GPS).', 'error');
+            return;
+          }
+          
+          this.isLoading = true;
+          this.loadingMsg = 'Merekodkan Data...';
+          
+          const payload = {
+            action: actionStr,
+            staffId: this.currentUser.staffId,
+            name: this.currentUser.name,
+            deviceId: this.getDeviceId(),
+            lat: this.location.lat,
+            lng: this.location.lng,
+            accuracy: this.location.accuracy
+          };
 
-                    try {
-                        const res = await this.apiCall('startOffCampus', payload);
-                        if(res.success) {
-                            this.showNotify(res.message, 'success');
-                            this.attendanceState = 'OFF_CAMPUS';
-                            this.attendanceRecord.latestDep = res.time;
-                            this.showOffCampusModal = false;
-                            this.offCampusForm = {destination: '', reason: ''};
-                        } else {
-                            this.showNotify(res.message, 'error');
-                        }
-                    } catch(e) {
-                        this.showNotify('Ralat menyimpan data.', 'error');
-                    }
-                    this.isSubmitting = false;
-                },
+          if (actionStr === 'startOffCampus') {
+            payload.destination = this.offCampus.destination;
+            payload.reason = this.offCampus.reason;
+          }
 
-                // --- ADMIN ACTIONS ---
-                async loadAdminData() {
-                    this.isLoading = true;
-                    try {
-                        const res = await this.apiCall('getAdminData', { token: this.adminToken });
-                        if(res.success) {
-                            this.adminStats = res.stats;
-                            this.adminRecords = res.attendance;
-                        } else {
-                            this.showNotify(res.message, 'error');
-                        }
-                    } catch(e) {
-                        this.showNotify('Ralat memuat data pentadbir', 'error');
-                    }
-                    this.isLoading = false;
-                },
-                async registerTeacher() {
-                    this.isSubmitting = true;
-                    try {
-                        const res = await this.apiCall('registerTeacher', { token: this.adminToken, staffId: this.newTeacher.id, name: this.newTeacher.name });
-                        if(res.success) {
-                            this.showNotify(res.message, 'success');
-                            this.newTeacher = {id: '', name: ''};
-                            this.loadAdminData();
-                        } else {
-                            this.showNotify(res.message, 'error');
-                        }
-                    } catch(e) {
-                        this.showNotify('Ralat mendaftar', 'error');
-                    }
-                    this.isSubmitting = false;
-                }
+          const res = await this.apiCall(payload);
+          this.isLoading = false;
+
+          if (res.success) {
+            this.showMessage(res.message);
+            // Kemaskini state bergantung pada butang
+            if (actionStr === 'checkIn') this.teacherState = 'PRESENT';
+            if (actionStr === 'startCourse') this.teacherState = 'COURSE';
+            if (actionStr === 'startOffCampus') this.teacherState = 'OFF_CAMPUS';
+            if (actionStr === 'returnSchool') this.teacherState = 'RETURNED';
+            if (actionStr === 'checkOut') this.teacherState = 'COMPLETED';
+            
+            // Reset input luar
+            this.offCampus.destination = '';
+            this.offCampus.reason = '';
+          } else {
+            this.showMessage(res.message, 'error');
+          }
+        },
+
+        // ---- PENTADBIR ----
+        async fetchAdminData() {
+          this.isLoading = true;
+          this.loadingMsg = 'Memuat Data...';
+          
+          const payload = {
+            action: 'getAdminData',
+            token: this.adminToken,
+            date: this.adminDate
+          };
+          
+          const res = await this.apiCall(payload);
+          this.isLoading = false;
+          
+          if (res.success) {
+            this.adminLogs = res.attendance || [];
+            if (res.stats) {
+              this.adminStats = res.stats;
             }
-        }).mount('#app');
-    </script>
+          } else {
+            this.showMessage(res.message, 'error');
+          }
+        },
+
+        // ---- MUAT NAIK PUKAL STAF (ADMIN) ----
+        handleFileUpload(event) {
+          const file = event.target.files[0];
+          if (!file) return;
+          
+          this.selectedFileName = file.name;
+          const reader = new FileReader();
+          
+          reader.onload = (e) => {
+            const text = e.target.result;
+            this.parseStaffText(text);
+          };
+          reader.readAsText(file);
+        },
+
+        parseStaffText(text) {
+          const lines = text.split('\n');
+          this.parsedStaffList = [];
+          
+          for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+            
+            // Cuba belah guna tab atau koma
+            let cols = line.split('\t');
+            if (cols.length < 2) cols = line.split(',');
+            
+            if (cols.length >= 2) {
+              const id = cols[0].replace(/['"]/g, '').trim();
+              const name = cols[1].replace(/['"]/g, '').trim();
+              
+              if (id.startsWith('SRATI') || id.match(/^[A-Z0-9]+$/)) {
+                this.parsedStaffList.push({ id, name });
+              }
+            }
+          }
+        },
+
+        async uploadStaffData() {
+          if (this.parsedStaffList.length === 0) return;
+          
+          this.isLoading = true;
+          this.loadingMsg = 'Mendaftar Senarai Guru...';
+          
+          const payload = {
+            action: 'bulkRegister',
+            token: this.adminToken,
+            staffList: this.parsedStaffList
+          };
+          
+          const res = await this.apiCall(payload);
+          this.isLoading = false;
+          
+          if (res.success) {
+            this.showMessage(res.message);
+            this.parsedStaffList = [];
+            this.selectedFileName = '';
+            document.getElementById('fileUpload').value = '';
+          } else {
+            this.showMessage(res.message, 'error');
+          }
+        },
+
+        printReport() {
+          window.print();
+        },
+
+        // ---- HELPERS UI ----
+        statusText(state) {
+          const s = {
+            'NOT_CHECKED_IN': 'Belum Hadir',
+            'PRESENT': 'Hadir (Sekolah)',
+            'COURSE': 'Berkursus / Bengkel',
+            'OFF_CAMPUS': 'Tugas Luar',
+            'RETURNED': 'Hadir (Kembali)',
+            'COMPLETED': 'Tamat Tugas'
+          };
+          return s[state] || state;
+        },
+        statusColorClass(state) {
+          const c = {
+            'NOT_CHECKED_IN': 'bg-gray-200 text-gray-700',
+            'PRESENT': 'bg-green-100 text-green-800',
+            'COURSE': 'bg-purple-100 text-purple-800',
+            'OFF_CAMPUS': 'bg-yellow-100 text-yellow-800',
+            'RETURNED': 'bg-blue-100 text-blue-800',
+            'COMPLETED': 'bg-red-100 text-red-800'
+          };
+          return c[state] || 'bg-gray-100';
+        },
+        formatTime(dateStr) {
+          if (!dateStr) return '';
+          try {
+            const d = new Date(dateStr);
+            if (isNaN(d.getTime())) return dateStr; 
+            return d.toLocaleTimeString('ms-MY', { hour12: false, hour: '2-digit', minute:'2-digit' });
+          } catch(e) { return dateStr; }
+        }
+      }
+    });
+    app.mount('#app');
+  </script>
 </body>
 </html>
