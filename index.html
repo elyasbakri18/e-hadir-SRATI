@@ -575,7 +575,7 @@
       data() {
         return {
           // Tetapan API Google Apps Script
-          gasUrl: 'https://script.google.com/macros/s/AKfycbzqwlVFkcqECI9Ln2-_IGN-pTHVpx-Y5bJ3hTpoHECt2844h5Ma3rn6RvTav-05KYNFfg/exec',
+          gasUrl: 'https://script.google.com/macros/s/AKfycbx-OjCBX0tg79JX1bRvIk5p6HPp9-7cEQ3dercvG5ol0R_JbepHL2J8FMKr-hJ8wHhBuw/exec',
           
           // State UI
           view: 'login', // login, teacher, admin
@@ -723,7 +723,7 @@
           const options = {
             enableHighAccuracy: true,
             timeout: 20000,        // Tingkatkan masa menunggu isyarat sehingga 20 saat
-            maximumAge: 5000       // Benarkan data caching maksimum 5 saat yang lalu sahaja
+            maximumAge: 0          // Paksa pelayar dapatkan lokasi baharu (jangan guna cache)
           };
 
           navigator.geolocation.getCurrentPosition(
