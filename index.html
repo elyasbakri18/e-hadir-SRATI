@@ -11,112 +11,126 @@
   <!-- FontAwesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     body {
       font-family: 'Inter', sans-serif;
-      background-color: #f3f4f6;
+      background-color: #f8fafc;
       -webkit-tap-highlight-color: transparent;
     }
-    .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
-    .fade-enter-from, .fade-leave-to { opacity: 0; }
+    .fade-enter-active, .fade-leave-active { transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+    .fade-enter-from, .fade-leave-to { opacity: 0; transform: translateY(10px); }
+    
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
     @media print {
       .no-print { display: none !important; }
       body { background-color: white; }
-      .print-container { padding: 0 !important; margin: 0 !important; width: 100% !important; }
-      .shadow-md { box-shadow: none !important; }
+      .print-container { padding: 0 !important; margin: 0 !important; width: 100% !important; box-shadow: none !important; max-width: 100% !important; }
+      .shadow-md, .shadow-lg, .shadow-xl { box-shadow: none !important; }
     }
   </style>
 </head>
-<body class="text-gray-800 antialiased h-screen flex flex-col">
+<body class="text-slate-800 antialiased h-screen flex flex-col selection:bg-blue-200 selection:text-blue-900">
 
-  <div id="app" class="flex-grow flex flex-col h-full w-full max-w-5xl mx-auto bg-white shadow-xl overflow-hidden print-container">
+  <div id="app" class="flex-grow flex flex-col h-full w-full max-w-5xl mx-auto bg-white shadow-2xl sm:rounded-none md:rounded-lg overflow-hidden print-container md:my-4 border border-slate-200">
     
     <!-- HEADER -->
-    <header class="bg-blue-800 text-white p-4 shadow-md flex justify-between items-center z-10 no-print">
-      <div class="flex items-center gap-3">
-        <i class="fas fa-school text-2xl"></i>
+    <header class="bg-gradient-to-r from-blue-700 to-indigo-800 text-white px-5 py-4 shadow-md flex justify-between items-center z-10 no-print">
+      <div class="flex items-center gap-4">
+        <div class="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+          <i class="fas fa-school text-2xl text-blue-50"></i>
+        </div>
         <div>
-          <h1 class="text-lg md:text-xl font-bold leading-tight">e-Hadir SRATI</h1>
-          <p class="text-xs text-blue-200">Sistem Kehadiran & Pergerakan Staf</p>
+          <h1 class="text-xl font-bold tracking-tight">e-Hadir SRATI</h1>
+          <p class="text-xs text-blue-200 font-medium mt-0.5">Sistem Kehadiran & Pergerakan Staf</p>
         </div>
       </div>
       <div v-if="view !== 'login'" class="text-right">
-        <button @click="logout" class="bg-red-500 hover:bg-red-600 text-white text-sm px-3 py-1.5 rounded transition shadow">
-          <i class="fas fa-sign-out-alt mr-1"></i> Log Keluar
+        <button @click="logout" class="bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm px-4 py-2 rounded-lg transition-all shadow-sm backdrop-blur-sm flex items-center">
+          <i class="fas fa-sign-out-alt mr-2"></i> Log Keluar
         </button>
       </div>
     </header>
 
     <!-- LOADING OVERLAY -->
-    <div v-if="isLoading" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex flex-col items-center justify-center text-white no-print">
-      <i class="fas fa-circle-notch fa-spin text-5xl mb-4"></i>
-      <p class="text-lg font-semibold">{{ loadingMsg }}</p>
+    <div v-if="isLoading" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex flex-col items-center justify-center text-white no-print">
+      <div class="bg-white/10 p-6 rounded-2xl flex flex-col items-center shadow-2xl border border-white/20">
+        <i class="fas fa-circle-notch fa-spin text-5xl mb-4 text-blue-400"></i>
+        <p class="text-lg font-medium tracking-wide">{{ loadingMsg }}</p>
+      </div>
     </div>
 
     <!-- MAIN CONTENT -->
-    <main class="flex-grow overflow-y-auto p-4 md:p-6 bg-gray-50 relative">
+    <main class="flex-grow overflow-y-auto p-4 md:p-8 bg-slate-50 relative">
 
       <!-- ================= LOG MASUK ================= -->
       <transition name="fade" mode="out-in">
-        <div v-if="view === 'login'" class="max-w-md mx-auto mt-8">
+        <div v-if="view === 'login'" class="max-w-md mx-auto mt-6 md:mt-12">
           
           <div class="text-center mb-8">
-            <div class="inline-block bg-blue-100 p-4 rounded-full mb-3 shadow-inner">
+            <div class="inline-flex bg-blue-100 p-5 rounded-2xl mb-4 shadow-inner">
               <i class="fas fa-fingerprint text-5xl text-blue-600"></i>
             </div>
-            <h2 class="text-2xl font-bold text-gray-800">Selamat Datang</h2>
-            <p class="text-gray-500 text-sm">Sila log masuk untuk meneruskan</p>
+            <h2 class="text-3xl font-bold text-slate-800 tracking-tight">Selamat Datang</h2>
+            <p class="text-slate-500 mt-2">Log masuk untuk meneruskan sesi anda</p>
           </div>
 
-          <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+          <div class="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
             <!-- TABS -->
-            <div class="flex border-b border-gray-200 bg-gray-50">
-              <button @click="loginType = 'teacher'" :class="{'bg-white font-bold text-blue-600 border-b-2 border-blue-600': loginType === 'teacher', 'text-gray-500 hover:text-gray-700': loginType === 'admin'}" class="flex-1 py-3 text-sm transition text-center">
-                <i class="fas fa-chalkboard-teacher mr-1"></i> Guru / Staf
+            <div class="flex border-b border-slate-100 bg-slate-50/50">
+              <button @click="loginType = 'teacher'" :class="{'bg-white font-semibold text-blue-600 border-b-2 border-blue-600': loginType === 'teacher', 'text-slate-500 hover:text-slate-700': loginType === 'admin'}" class="flex-1 py-4 text-sm transition-all text-center">
+                <i class="fas fa-chalkboard-teacher mr-2"></i> Guru / Staf
               </button>
-              <button @click="loginType = 'admin'" :class="{'bg-white font-bold text-blue-600 border-b-2 border-blue-600': loginType === 'admin', 'text-gray-500 hover:text-gray-700': loginType === 'teacher'}" class="flex-1 py-3 text-sm transition text-center">
-                <i class="fas fa-user-shield mr-1"></i> Admin
+              <button @click="loginType = 'admin'" :class="{'bg-white font-semibold text-blue-600 border-b-2 border-blue-600': loginType === 'admin', 'text-slate-500 hover:text-slate-700': loginType === 'teacher'}" class="flex-1 py-4 text-sm transition-all text-center">
+                <i class="fas fa-user-shield mr-2"></i> Pentadbir
               </button>
             </div>
 
-            <div class="p-6">
+            <div class="p-6 md:p-8">
               <!-- LOGIN GURU -->
               <div v-if="loginType === 'teacher'">
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Pilih Nama Anda</label>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Pilih Nama Pengguna</label>
                 <div class="relative">
-                  <select v-model="selectedStaff" @change="loginTeacher" class="w-full border border-gray-300 rounded-lg p-3 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                    <option value="" disabled selected>-- Sila Pilih Nama --</option>
+                  <select v-model="selectedStaff" @change="loginTeacher" class="w-full border-slate-200 border-2 rounded-xl p-3.5 appearance-none focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer text-slate-700">
+                    <option value="" disabled selected>{{ staffList.length === 0 ? 'Memuat turun senarai...' : '-- Sila Pilih Nama Anda --' }}</option>
                     <option v-for="staff in staffList" :key="staff.id" :value="staff.id">
                       {{ staff.name }} ({{ staff.id }})
                     </option>
                   </select>
-                  <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                  <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
                     <i class="fas fa-chevron-down"></i>
                   </div>
                 </div>
-                <p class="text-xs text-gray-400 mt-3 flex items-center">
-                  <i class="fas fa-info-circle mr-1"></i> Memilih nama akan mendaftar masuk secara automatik.
-                </p>
+                <div class="mt-4 bg-blue-50/50 border border-blue-100 rounded-lg p-3 flex items-start gap-3">
+                  <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
+                  <p class="text-xs text-slate-500 leading-relaxed">
+                    Sistem akan mendaftar masuk secara automatik selepas anda memilih nama. Pastikan lokasi peranti diaktifkan.
+                  </p>
+                </div>
               </div>
 
               <!-- LOGIN ADMIN -->
               <form v-if="loginType === 'admin'" @submit.prevent="loginAdmin">
-                <div class="mb-4">
-                  <label class="block text-sm font-semibold text-gray-700 mb-1">ID Pengguna</label>
-                  <input type="text" v-model="adminUser" required class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Contoh: admin">
-                </div>
                 <div class="mb-5">
-                  <label class="block text-sm font-semibold text-gray-700 mb-1">Kata Laluan</label>
-                  <input type="password" v-model="adminPass" required class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="••••••••">
+                  <label class="block text-sm font-medium text-slate-700 mb-2">ID Pengguna</label>
+                  <input type="text" v-model="adminUser" required class="w-full border-slate-200 border-2 rounded-xl p-3.5 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 bg-slate-50 transition-colors" placeholder="Masukkan ID Pentadbir">
                 </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-md transition">
-                  Log Masuk Admin
+                <div class="mb-6">
+                  <label class="block text-sm font-medium text-slate-700 mb-2">Kata Laluan</label>
+                  <input type="password" v-model="adminPass" required class="w-full border-slate-200 border-2 rounded-xl p-3.5 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 bg-slate-50 transition-colors" placeholder="••••••••">
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-3.5 rounded-xl shadow-lg shadow-blue-500/30 transition-all transform hover:-translate-y-0.5">
+                  Log Masuk
                 </button>
               </form>
             </div>
             
-            <div v-if="demoMode" class="bg-yellow-100 p-2 text-center text-xs text-yellow-700 font-semibold border-t border-yellow-200">
-              <i class="fas fa-exclamation-triangle"></i> Mod Demo (Pelayan luar talian)
+            <div v-if="demoMode" class="bg-amber-50 p-3 text-center text-xs text-amber-700 font-medium border-t border-amber-200/50 flex items-center justify-center gap-2">
+              <i class="fas fa-bolt text-amber-500"></i> Beroperasi dalam Mod Luar Talian (Demo)
             </div>
           </div>
         </div>
@@ -124,17 +138,25 @@
         <!-- ================= PAPAN PEMUKA GURU ================= -->
         <div v-else-if="view === 'teacher'" class="max-w-md mx-auto">
           
-          <div class="bg-white rounded-xl shadow p-5 mb-5 border-l-4 border-blue-500">
-            <h2 class="text-xl font-bold text-gray-800">{{ currentUser.name }}</h2>
-            <p class="text-sm text-gray-500">ID: {{ currentUser.id }}</p>
-            <div class="mt-3 flex justify-between items-center bg-gray-50 p-3 rounded border">
+          <!-- INFO PROFIL -->
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-5 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-1.5 h-full bg-blue-500"></div>
+            <div class="flex justify-between items-start mb-4">
               <div>
-                <p class="text-xs text-gray-400 font-semibold uppercase">Masa Semasa</p>
-                <p class="text-lg font-bold text-blue-800">{{ currentTime }}</p>
+                <h2 class="text-xl font-bold text-slate-800">{{ currentUser.name }}</h2>
+                <p class="text-sm text-slate-500 font-mono mt-1"><i class="fas fa-id-badge mr-1.5 opacity-70"></i>{{ currentUser.id }}</p>
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-3 mt-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+              <div>
+                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Masa Semasa</p>
+                <p class="text-lg font-bold text-slate-800 font-mono">{{ currentTime }}</p>
               </div>
               <div class="text-right">
-                <p class="text-xs text-gray-400 font-semibold uppercase">Status</p>
-                <span class="inline-block px-2 py-1 rounded text-xs font-bold" :class="statusColorClass(teacherState)">
+                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Status Kehadiran</p>
+                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold" :class="statusColorClass(teacherState)">
+                  <span class="w-1.5 h-1.5 rounded-full mr-1.5" :class="statusDotClass(teacherState)"></span>
                   {{ statusText(teacherState) }}
                 </span>
               </div>
@@ -142,170 +164,239 @@
           </div>
 
           <!-- KAD LOKASI GPS -->
-          <div class="bg-white rounded-xl shadow p-4 mb-5">
-            <h3 class="text-sm font-bold text-gray-700 mb-2 border-b pb-1">Pengesahan Lokasi GPS</h3>
-            <div class="flex items-center gap-3 mt-3">
-              <div class="rounded-full h-10 w-10 flex items-center justify-center text-white" :class="location.valid ? 'bg-green-500' : 'bg-red-500'">
-                <i class="fas" :class="location.valid ? 'fa-map-marker-alt' : 'fa-times-circle'"></i>
-              </div>
-              <div class="flex-1">
-                <p class="text-sm font-semibold" :class="location.valid ? 'text-green-700' : 'text-red-600'">{{ location.status }}</p>
-                <p v-if="location.distance !== null" class="text-xs text-gray-500">Jarak: {{ location.distance }} meter dari sekolah</p>
-              </div>
-              <button @click="initGPS" class="p-2 text-blue-500 bg-blue-50 rounded-full hover:bg-blue-100 transition">
-                <i class="fas fa-sync-alt"></i>
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-6">
+            <div class="flex items-center justify-between mb-3 border-b border-slate-100 pb-3">
+              <h3 class="text-sm font-bold text-slate-700 flex items-center">
+                <i class="fas fa-satellite-dish mr-2 text-slate-400"></i> Isyarat GPS
+              </h3>
+              <button @click="initGPS" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded-lg transition-colors flex items-center font-medium">
+                <i class="fas fa-sync-alt mr-1.5"></i> Segar
               </button>
             </div>
-            <p v-if="!location.valid && location.distance !== null" class="text-xs text-red-500 mt-2 bg-red-50 p-2 rounded">
-              Anda berada di luar zon 200m sekolah. Sila hampiri kawasan sekolah untuk mendaftar kehadiran harian.
-            </p>
+            
+            <div class="flex items-center gap-4">
+              <div class="relative flex-shrink-0">
+                <div class="absolute inset-0 rounded-full blur-sm" :class="location.valid ? 'bg-emerald-400/50' : 'bg-rose-400/50'"></div>
+                <div class="relative rounded-full h-12 w-12 flex items-center justify-center text-white shadow-inner" :class="location.valid ? 'bg-emerald-500' : 'bg-rose-500'">
+                  <i class="fas text-lg" :class="location.valid ? 'fa-check' : 'fa-times'"></i>
+                </div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-bold truncate" :class="location.valid ? 'text-emerald-700' : 'text-rose-600'">{{ location.status }}</p>
+                <p v-if="location.distance !== null" class="text-xs text-slate-500 mt-0.5 font-medium">
+                  <i class="fas fa-map-marker-alt mr-1 opacity-60"></i> Jarak dari sekolah: {{ location.distance }}m
+                </p>
+              </div>
+            </div>
+            
+            <div v-if="!location.valid && location.distance !== null" class="mt-4 bg-rose-50/50 border border-rose-100 p-3 rounded-lg flex items-start gap-2">
+              <i class="fas fa-exclamation-circle text-rose-500 mt-0.5"></i>
+              <p class="text-xs text-rose-600 leading-relaxed font-medium">
+                Anda berada di luar zon (200m). Dekati kawasan sekolah untuk pendaftaran kehadiran.
+              </p>
+            </div>
           </div>
 
           <!-- TINDAKAN UTAMA -->
-          <div class="grid grid-cols-1 gap-3">
+          <div class="space-y-3">
             
             <!-- Daftar Masuk -->
-            <button v-if="teacherState === 'NOT_CHECKED_IN'" @click="performAction('checkIn')" :disabled="!location.valid" :class="!location.valid ? 'bg-gray-300 cursor-not-allowed text-gray-500' : 'bg-green-600 hover:bg-green-700 text-white shadow-md'" class="w-full p-4 rounded-xl font-bold flex flex-col items-center justify-center transition h-24">
-              <i class="fas fa-sign-in-alt text-2xl mb-1"></i>
-              DAFTAR MASUK HARI INI
+            <button v-if="teacherState === 'NOT_CHECKED_IN'" @click="performAction('checkIn')" :disabled="!location.valid" :class="!location.valid ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/20 hover:-translate-y-0.5'" class="w-full border p-5 rounded-2xl font-bold flex flex-col items-center justify-center transition-all h-28 relative overflow-hidden group">
+              <div v-if="location.valid" class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out"></div>
+              <i class="fas fa-sign-in-alt text-3xl mb-2 relative z-10"></i>
+              <span class="relative z-10 tracking-wide">DAFTAR MASUK</span>
             </button>
 
-            <!-- Berkursus / Bengkel (Hanya jika belum check-in/kursus) -->
-            <button v-if="teacherState === 'NOT_CHECKED_IN'" @click="performAction('startCourse')" class="w-full p-4 rounded-xl font-bold flex flex-col items-center justify-center transition h-24 bg-purple-600 hover:bg-purple-700 text-white shadow-md mt-2">
-              <i class="fas fa-chalkboard-teacher text-2xl mb-1"></i>
-              REKOD BERKURSUS / BENGKEL
+            <!-- Berkursus / Bengkel -->
+            <button v-if="teacherState === 'NOT_CHECKED_IN'" @click="performAction('startCourse')" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white p-5 rounded-2xl font-bold flex flex-col items-center justify-center transition-all h-28 shadow-lg shadow-indigo-500/20 hover:-translate-y-0.5 relative overflow-hidden group">
+              <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out"></div>
+              <i class="fas fa-chalkboard-teacher text-3xl mb-2 relative z-10"></i>
+              <span class="relative z-10 tracking-wide text-sm">REKOD BERKURSUS / BENGKEL</span>
             </button>
 
             <!-- Urusan Luar -->
-            <div v-if="teacherState === 'PRESENT' || teacherState === 'RETURNED'" class="bg-white rounded-xl shadow p-4 border border-blue-100">
-              <h3 class="text-sm font-bold text-gray-700 mb-3 text-center">Keluar Atas Urusan Rasmi</h3>
-              <input type="text" v-model="offCampus.destination" placeholder="Destinasi..." class="w-full mb-2 border border-gray-300 rounded p-2 text-sm focus:ring-1 focus:ring-blue-500">
-              <input type="text" v-model="offCampus.reason" placeholder="Tujuan..." class="w-full mb-3 border border-gray-300 rounded p-2 text-sm focus:ring-1 focus:ring-blue-500">
-              <button @click="performAction('startOffCampus')" :disabled="!location.valid || !offCampus.destination" :class="(!location.valid || !offCampus.destination) ? 'bg-gray-300 text-gray-500' : 'bg-yellow-500 hover:bg-yellow-600 text-white'" class="w-full py-2 rounded font-bold transition shadow">
-                <i class="fas fa-car-side mr-1"></i> MULA URUSAN LUAR
-              </button>
+            <div v-if="teacherState === 'PRESENT' || teacherState === 'RETURNED'" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 overflow-hidden relative">
+              <div class="absolute top-0 left-0 w-full h-1 bg-amber-400"></div>
+              <h3 class="text-sm font-bold text-slate-700 mb-4 flex items-center justify-center">
+                <i class="fas fa-briefcase mr-2 text-amber-500"></i> Urusan Rasmi Luar
+              </h3>
+              <div class="space-y-3">
+                <div class="relative">
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                    <i class="fas fa-map-pin"></i>
+                  </div>
+                  <input type="text" v-model="offCampus.destination" placeholder="Lokasi Destinasi..." class="w-full pl-9 pr-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 bg-slate-50 transition-colors">
+                </div>
+                <div class="relative">
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                    <i class="fas fa-comment-alt"></i>
+                  </div>
+                  <input type="text" v-model="offCampus.reason" placeholder="Tujuan Rasmi..." class="w-full pl-9 pr-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 bg-slate-50 transition-colors">
+                </div>
+                <button @click="performAction('startOffCampus')" :disabled="!location.valid || !offCampus.destination" :class="(!location.valid || !offCampus.destination) ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-amber-500 hover:bg-amber-600 text-white shadow-md shadow-amber-500/20'" class="w-full py-3 rounded-xl font-bold transition-all mt-2">
+                  MULA PERGERAKAN LUAR
+                </button>
+              </div>
             </div>
 
             <!-- Kembali -->
-            <button v-if="teacherState === 'OFF_CAMPUS'" @click="performAction('returnSchool')" :disabled="!location.valid" :class="!location.valid ? 'bg-gray-300 text-gray-500' : 'bg-blue-500 hover:bg-blue-600 text-white shadow-md'" class="w-full p-4 rounded-xl font-bold flex flex-col items-center justify-center transition h-24">
-              <i class="fas fa-undo-alt text-2xl mb-1"></i>
-              REKOD KEMBALI KE SEKOLAH
+            <button v-if="teacherState === 'OFF_CAMPUS'" @click="performAction('returnSchool')" :disabled="!location.valid" :class="!location.valid ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20 hover:-translate-y-0.5'" class="w-full border p-5 rounded-2xl font-bold flex flex-col items-center justify-center transition-all h-28 relative overflow-hidden group">
+              <div v-if="location.valid" class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out"></div>
+              <i class="fas fa-undo-alt text-3xl mb-2 relative z-10"></i>
+              <span class="relative z-10 tracking-wide text-sm">REKOD KEMBALI</span>
             </button>
 
             <!-- Pulang -->
-            <button v-if="teacherState === 'PRESENT' || teacherState === 'RETURNED'" @click="performAction('checkOut')" :disabled="!location.valid" :class="!location.valid ? 'bg-gray-300 text-gray-500' : 'bg-red-500 hover:bg-red-600 text-white shadow-md'" class="w-full p-4 rounded-xl font-bold flex flex-col items-center justify-center transition h-24 mt-4 border-2 border-red-200">
-              <i class="fas fa-sign-out-alt text-2xl mb-1"></i>
-              DAFTAR PULANG (TAMAT TUGAS)
+            <button v-if="teacherState === 'PRESENT' || teacherState === 'RETURNED'" @click="performAction('checkOut')" :disabled="!location.valid" :class="!location.valid ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-rose-500 hover:bg-rose-600 text-white shadow-lg shadow-rose-500/20 hover:-translate-y-0.5'" class="w-full p-5 rounded-2xl font-bold flex flex-col items-center justify-center transition-all h-28 mt-6 relative overflow-hidden group">
+               <div v-if="location.valid" class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out"></div>
+              <i class="fas fa-door-open text-3xl mb-2 relative z-10"></i>
+              <span class="relative z-10 tracking-wide">DAFTAR PULANG</span>
             </button>
 
             <!-- Telah Selesai / Sedang Kursus -->
-            <div v-if="teacherState === 'COMPLETED'" class="bg-green-100 text-green-800 p-6 rounded-xl text-center shadow border border-green-300">
-              <i class="fas fa-check-circle text-4xl mb-2"></i>
-              <h3 class="font-bold text-lg">Tugas Selesai</h3>
-              <p class="text-sm">Terima kasih. Anda telah mendaftar pulang untuk hari ini.</p>
+            <div v-if="teacherState === 'COMPLETED'" class="bg-emerald-50 border border-emerald-100 p-6 rounded-2xl text-center shadow-sm relative overflow-hidden mt-6">
+              <div class="absolute top-0 right-0 p-4 opacity-10">
+                <i class="fas fa-check-circle text-8xl text-emerald-500"></i>
+              </div>
+              <i class="fas fa-check-circle text-4xl mb-3 text-emerald-500 relative z-10"></i>
+              <h3 class="font-bold text-lg text-emerald-800 relative z-10">Tugas Selesai</h3>
+              <p class="text-sm text-emerald-600/80 mt-1 relative z-10 font-medium">Terima kasih. Anda telah mendaftar pulang untuk hari ini.</p>
             </div>
             
-            <div v-if="teacherState === 'COURSE'" class="bg-purple-100 text-purple-800 p-6 rounded-xl text-center shadow border border-purple-300">
-              <i class="fas fa-chalkboard-teacher text-4xl mb-2"></i>
-              <h3 class="font-bold text-lg">Sedang Berkursus</h3>
-              <p class="text-sm">Kehadiran anda didaftarkan sebagai berkursus/bengkel untuk hari ini.</p>
+            <div v-if="teacherState === 'COURSE'" class="bg-indigo-50 border border-indigo-100 p-6 rounded-2xl text-center shadow-sm relative overflow-hidden mt-6">
+               <div class="absolute top-0 right-0 p-4 opacity-10">
+                <i class="fas fa-chalkboard-teacher text-8xl text-indigo-500"></i>
+              </div>
+              <i class="fas fa-chalkboard-teacher text-4xl mb-3 text-indigo-500 relative z-10"></i>
+              <h3 class="font-bold text-lg text-indigo-800 relative z-10">Sedang Berkursus</h3>
+              <p class="text-sm text-indigo-600/80 mt-1 relative z-10 font-medium">Kehadiran direkodkan sebagai berkursus untuk hari ini.</p>
             </div>
 
           </div>
 
-          <!-- NOTA/MAKLUMAN MESEJ (Custom Alert/Toast) -->
-          <div v-if="sysMessage" class="mt-5 p-3 rounded-lg text-sm border font-semibold flex justify-between items-center" :class="sysMessage.type === 'error' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-green-50 text-green-700 border-green-200'">
-            <span><i :class="sysMessage.type === 'error' ? 'fas fa-exclamation-triangle' : 'fas fa-check-circle'" class="mr-2"></i> {{ sysMessage.text }}</span>
-            <button @click="sysMessage = null" class="text-gray-400 hover:text-gray-700"><i class="fas fa-times"></i></button>
-          </div>
+          <!-- NOTA/MAKLUMAN MESEJ (Toast) -->
+          <transition name="fade">
+            <div v-if="sysMessage" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 w-full max-w-sm px-4 z-50">
+              <div class="p-4 rounded-xl shadow-xl flex items-center justify-between font-medium backdrop-blur-md" :class="sysMessage.type === 'error' ? 'bg-rose-500/90 text-white' : 'bg-emerald-500/90 text-white'">
+                <div class="flex items-center">
+                  <i :class="sysMessage.type === 'error' ? 'fas fa-exclamation-circle' : 'fas fa-check-circle'" class="mr-3 text-lg"></i> 
+                  <span class="text-sm">{{ sysMessage.text }}</span>
+                </div>
+                <button @click="sysMessage = null" class="opacity-70 hover:opacity-100 transition-opacity"><i class="fas fa-times"></i></button>
+              </div>
+            </div>
+          </transition>
         </div>
 
         <!-- ================= PAPAN PEMUKA ADMIN ================= -->
         <div v-else-if="view === 'admin'" class="w-full">
           
-          <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 no-print gap-4">
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 no-print gap-4">
             <div>
-              <h2 class="text-2xl font-bold text-gray-800">Panel Pentadbir</h2>
-              <p class="text-gray-500">Pengurusan Kehadiran & Data Staf</p>
+              <h2 class="text-3xl font-bold text-slate-800 tracking-tight">Panel Pentadbir</h2>
+              <p class="text-slate-500 mt-1">Sistem Pengurusan e-Hadir</p>
             </div>
-            <div class="flex items-center gap-3">
-              <input type="date" v-model="adminDate" @change="fetchAdminData" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500">
-              <button @click="fetchAdminData" class="bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-2 rounded-lg text-sm font-semibold transition">
-                <i class="fas fa-sync-alt mr-1"></i> Segar Semula
+            <div class="flex flex-wrap items-center gap-3">
+              <div class="relative bg-white rounded-xl shadow-sm border border-slate-200 p-1 flex items-center">
+                <i class="fas fa-calendar-alt text-slate-400 ml-3 mr-2"></i>
+                <input type="date" v-model="adminDate" @change="fetchAdminData" class="border-none bg-transparent text-sm focus:ring-0 text-slate-700 font-medium py-1.5 pr-2 outline-none cursor-pointer">
+              </div>
+              <button @click="fetchAdminData" class="bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-100 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors flex items-center">
+                <i class="fas fa-sync-alt mr-2"></i> Segar
               </button>
-              <button @click="printReport" class="bg-gray-800 text-white hover:bg-gray-900 px-3 py-2 rounded-lg text-sm font-semibold transition shadow">
-                <i class="fas fa-print mr-1"></i> Cetak
+              <button @click="printReport" class="bg-slate-800 text-white hover:bg-slate-700 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors shadow-md flex items-center">
+                <i class="fas fa-print mr-2"></i> Cetak
               </button>
             </div>
           </div>
 
           <!-- TAB NAVIGASI ADMIN -->
-          <div class="flex overflow-x-auto border-b border-gray-200 mb-6 bg-white rounded-t-lg shadow-sm no-print">
-            <button @click="adminTab = 'hadir'" :class="adminTab === 'hadir' ? 'border-b-2 border-blue-600 text-blue-600 font-bold' : 'text-gray-500'" class="px-5 py-3 text-sm transition whitespace-nowrap">
-              <i class="fas fa-users mr-1"></i> Rekod Harian
+          <div class="flex overflow-x-auto border-b border-slate-200 mb-6 no-print gap-6">
+            <button @click="adminTab = 'hadir'" :class="adminTab === 'hadir' ? 'border-b-2 border-blue-600 text-blue-600 font-bold' : 'text-slate-500 hover:text-slate-700 font-medium'" class="pb-3 text-sm transition-colors whitespace-nowrap flex items-center">
+              <i class="fas fa-users mr-2"></i> Rekod Harian
             </button>
-            <button @click="adminTab = 'pergerakan'" :class="adminTab === 'pergerakan' ? 'border-b-2 border-blue-600 text-blue-600 font-bold' : 'text-gray-500'" class="px-5 py-3 text-sm transition whitespace-nowrap">
-              <i class="fas fa-route mr-1"></i> Log Pergerakan & Kursus
+            <button @click="adminTab = 'pergerakan'" :class="adminTab === 'pergerakan' ? 'border-b-2 border-blue-600 text-blue-600 font-bold' : 'text-slate-500 hover:text-slate-700 font-medium'" class="pb-3 text-sm transition-colors whitespace-nowrap flex items-center">
+              <i class="fas fa-route mr-2"></i> Log Pergerakan
             </button>
-            <button @click="adminTab = 'staf'" :class="adminTab === 'staf' ? 'border-b-2 border-blue-600 text-blue-600 font-bold' : 'text-gray-500'" class="px-5 py-3 text-sm transition whitespace-nowrap">
-              <i class="fas fa-user-cog mr-1"></i> Pengurusan Staf
+            <button @click="adminTab = 'staf'" :class="adminTab === 'staf' ? 'border-b-2 border-blue-600 text-blue-600 font-bold' : 'text-slate-500 hover:text-slate-700 font-medium'" class="pb-3 text-sm transition-colors whitespace-nowrap flex items-center">
+              <i class="fas fa-user-cog mr-2"></i> Pengurusan Staf
             </button>
           </div>
 
-          <!-- SUMMARY CARDS (Paparan di semua tab cetak kecuali staf) -->
-          <div v-if="adminTab !== 'staf'" class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
-            <div class="bg-white p-3 rounded-lg shadow border-l-4 border-blue-500">
-              <p class="text-xs text-gray-500 uppercase font-bold">Jum. Staf</p>
-              <p class="text-xl font-bold">{{ adminStats.total }}</p>
+          <!-- SUMMARY CARDS -->
+          <div v-if="adminTab !== 'staf'" class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
+              <div class="flex justify-between items-start mb-2">
+                <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Jum. Staf</p>
+                <div class="bg-slate-100 p-1.5 rounded-lg text-slate-400"><i class="fas fa-users"></i></div>
+              </div>
+              <p class="text-2xl font-bold text-slate-800">{{ adminStats.total }}</p>
             </div>
-            <div class="bg-white p-3 rounded-lg shadow border-l-4 border-green-500">
-              <p class="text-xs text-gray-500 uppercase font-bold">Hadir</p>
-              <p class="text-xl font-bold text-green-600">{{ adminStats.present }}</p>
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
+              <div class="flex justify-between items-start mb-2">
+                <p class="text-xs text-emerald-600/70 font-bold uppercase tracking-wider">Hadir</p>
+                <div class="bg-emerald-50 p-1.5 rounded-lg text-emerald-500"><i class="fas fa-check"></i></div>
+              </div>
+              <p class="text-2xl font-bold text-emerald-600">{{ adminStats.present }}</p>
             </div>
-            <div class="bg-white p-3 rounded-lg shadow border-l-4 border-purple-500">
-              <p class="text-xs text-gray-500 uppercase font-bold">Kursus</p>
-              <p class="text-xl font-bold text-purple-600">{{ adminStats.course }}</p>
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
+              <div class="flex justify-between items-start mb-2">
+                <p class="text-xs text-indigo-600/70 font-bold uppercase tracking-wider">Kursus</p>
+                <div class="bg-indigo-50 p-1.5 rounded-lg text-indigo-500"><i class="fas fa-chalkboard-teacher"></i></div>
+              </div>
+              <p class="text-2xl font-bold text-indigo-600">{{ adminStats.course }}</p>
             </div>
-            <div class="bg-white p-3 rounded-lg shadow border-l-4 border-yellow-500">
-              <p class="text-xs text-gray-500 uppercase font-bold">Luar (Tugas)</p>
-              <p class="text-xl font-bold text-yellow-600">{{ adminStats.offcampus }}</p>
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
+               <div class="flex justify-between items-start mb-2">
+                <p class="text-xs text-amber-600/70 font-bold uppercase tracking-wider">Luar</p>
+                <div class="bg-amber-50 p-1.5 rounded-lg text-amber-500"><i class="fas fa-car"></i></div>
+              </div>
+              <p class="text-2xl font-bold text-amber-600">{{ adminStats.offcampus }}</p>
             </div>
-            <div class="bg-white p-3 rounded-lg shadow border-l-4 border-red-500">
-              <p class="text-xs text-gray-500 uppercase font-bold">Tamat (Pulang)</p>
-              <p class="text-xl font-bold text-red-600">{{ adminStats.completed }}</p>
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
+              <div class="flex justify-between items-start mb-2">
+                <p class="text-xs text-rose-600/70 font-bold uppercase tracking-wider">Tamat</p>
+                <div class="bg-rose-50 p-1.5 rounded-lg text-rose-500"><i class="fas fa-door-closed"></i></div>
+              </div>
+              <p class="text-2xl font-bold text-rose-600">{{ adminStats.completed }}</p>
             </div>
           </div>
 
           <!-- TAB: REKOD HARIAN -->
-          <div v-if="adminTab === 'hadir'" class="bg-white rounded-lg shadow overflow-hidden">
-            <div class="p-4 bg-gray-50 border-b border-gray-200">
-              <h3 class="font-bold text-gray-700 text-lg">Jadual Kehadiran: {{ adminDate }}</h3>
+          <div v-if="adminTab === 'hadir'" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-5 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+              <h3 class="font-bold text-slate-800">Jadual Kehadiran <span class="text-slate-500 font-normal ml-2 text-sm">{{ adminDate }}</span></h3>
             </div>
             <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse text-sm">
+              <table class="w-full text-left border-collapse">
                 <thead>
-                  <tr class="bg-gray-100 text-gray-600 uppercase text-xs">
-                    <th class="p-3 border-b">ID</th>
-                    <th class="p-3 border-b">Nama</th>
-                    <th class="p-3 border-b">Status</th>
-                    <th class="p-3 border-b">Waktu Masuk</th>
-                    <th class="p-3 border-b">Waktu Pulang</th>
+                  <tr class="bg-white text-slate-400 uppercase text-[10px] tracking-wider font-bold border-b border-slate-100">
+                    <th class="p-4 pl-6">Maklumat Staf</th>
+                    <th class="p-4">Status</th>
+                    <th class="p-4">Waktu Masuk</th>
+                    <th class="p-4 pr-6">Waktu Pulang</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody class="text-sm">
                   <tr v-if="adminLogs.length === 0">
-                    <td colspan="5" class="p-6 text-center text-gray-500">Tiada rekod kehadiran untuk tarikh ini.</td>
+                    <td colspan="4" class="p-8 text-center text-slate-400 flex flex-col items-center">
+                      <i class="fas fa-inbox text-3xl mb-2 opacity-50"></i>
+                      <span>Tiada rekod dijumpai untuk tarikh ini.</span>
+                    </td>
                   </tr>
-                  <tr v-for="log in adminLogs" :key="log.id" class="border-b hover:bg-gray-50 transition">
-                    <td class="p-3 font-mono text-xs text-gray-600">{{ log.id }}</td>
-                    <td class="p-3 font-semibold">{{ log.name }}</td>
-                    <td class="p-3">
-                      <span class="px-2 py-1 rounded text-xs font-bold" :class="statusColorClass(log.status)">
+                  <tr v-for="log in adminLogs" :key="log.id" class="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
+                    <td class="p-4 pl-6">
+                      <div class="font-semibold text-slate-800">{{ log.name }}</div>
+                      <div class="text-[11px] text-slate-400 font-mono mt-0.5">{{ log.id }}</div>
+                    </td>
+                    <td class="p-4">
+                      <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-bold" :class="statusColorClass(log.status)">
+                        <span class="w-1.5 h-1.5 rounded-full mr-1.5" :class="statusDotClass(log.status)"></span>
                         {{ statusText(log.status) }}
                       </span>
                     </td>
-                    <td class="p-3">{{ formatTime(log.timeIn) }}</td>
-                    <td class="p-3">{{ formatTime(log.timeOut) || '-' }}</td>
+                    <td class="p-4 font-mono text-slate-600">{{ formatTime(log.timeIn) }}</td>
+                    <td class="p-4 pr-6 font-mono text-slate-600">{{ formatTime(log.timeOut) || '-' }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -313,79 +404,97 @@
           </div>
 
           <!-- TAB: PERGERAKAN -->
-          <div v-if="adminTab === 'pergerakan'" class="bg-white rounded-lg shadow overflow-hidden">
-            <div class="p-4 bg-gray-50 border-b border-gray-200">
-              <h3 class="font-bold text-gray-700 text-lg">Log Pergerakan Keluar & Kursus</h3>
+          <div v-if="adminTab === 'pergerakan'" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+             <div class="p-5 bg-slate-50 border-b border-slate-200">
+              <h3 class="font-bold text-slate-800">Log Pergerakan Keluar & Kursus</h3>
             </div>
             <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse text-sm">
+              <table class="w-full text-left border-collapse">
                 <thead>
-                  <tr class="bg-gray-100 text-gray-600 uppercase text-xs">
-                    <th class="p-3 border-b">Nama</th>
-                    <th class="p-3 border-b">Status</th>
-                    <th class="p-3 border-b">Masa Keluar</th>
-                    <th class="p-3 border-b">Masa Kembali</th>
+                  <tr class="bg-white text-slate-400 uppercase text-[10px] tracking-wider font-bold border-b border-slate-100">
+                    <th class="p-4 pl-6">Staf</th>
+                    <th class="p-4">Jenis Rekod</th>
+                    <th class="p-4">Waktu Keluar</th>
+                    <th class="p-4 pr-6">Waktu Kembali</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody class="text-sm">
                   <tr v-if="adminMovementLogs.length === 0">
-                    <td colspan="4" class="p-6 text-center text-gray-500">Tiada rekod pergerakan di luar sekolah / kursus.</td>
+                    <td colspan="4" class="p-8 text-center text-slate-400">Tiada rekod pergerakan di luar kawasan.</td>
                   </tr>
-                  <tr v-for="log in adminMovementLogs" :key="log.id" class="border-b hover:bg-gray-50">
-                    <td class="p-3 font-semibold">{{ log.name }} <br><span class="text-xs text-gray-400 font-mono">{{log.id}}</span></td>
-                    <td class="p-3">
-                      <span class="px-2 py-1 rounded text-xs font-bold" :class="statusColorClass(log.status)">
+                  <tr v-for="log in adminMovementLogs" :key="log.id" class="border-b border-slate-50 hover:bg-slate-50/50">
+                    <td class="p-4 pl-6">
+                      <div class="font-semibold text-slate-800">{{ log.name }}</div>
+                    </td>
+                    <td class="p-4">
+                      <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-bold" :class="statusColorClass(log.status)">
                         {{ statusText(log.status) }}
                       </span>
                     </td>
-                    <td class="p-3 text-red-600">{{ formatTime(log.latestDep) || '-' }}</td>
-                    <td class="p-3 text-green-600">{{ formatTime(log.latestRet) || '-' }}</td>
+                    <td class="p-4 font-mono text-amber-600">{{ formatTime(log.latestDep) || '-' }}</td>
+                    <td class="p-4 pr-6 font-mono text-emerald-600">{{ formatTime(log.latestRet) || '-' }}</td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </div>
 
-          <!-- TAB: PENGURUSAN STAF (MUAT NAIK) -->
-          <div v-if="adminTab === 'staf'" class="no-print">
-            <div class="bg-white rounded-lg shadow p-6 border-t-4 border-blue-500">
-              <h3 class="font-bold text-gray-800 text-lg mb-2"><i class="fas fa-file-upload mr-2 text-blue-600"></i>Muat Naik Pukal Maklumat Staf</h3>
-              <p class="text-sm text-gray-600 mb-4">Muat naik fail jadual (seperti CSV atau TXT) yang mengandungi lajur <strong>ID Staf</strong> dan <strong>Nama</strong> untuk mendaftarkan senarai guru ke dalam Google Sheets secara automatik.</p>
+          <!-- TAB: PENGURUSAN STAF -->
+          <div v-if="adminTab === 'staf'" class="no-print max-w-3xl">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
+              <div class="flex items-center mb-4 text-blue-600">
+                <div class="bg-blue-50 p-2.5 rounded-xl mr-4"><i class="fas fa-file-upload text-xl"></i></div>
+                <h3 class="font-bold text-slate-800 text-xl">Muat Naik Data Staf</h3>
+              </div>
+              <p class="text-sm text-slate-500 mb-6 leading-relaxed">Format yang disokong: Fail <strong>.CSV</strong> atau <strong>.TXT</strong>. <br> Struktur data mestilah mengandungi lajur <code>ID Staf</code> dan <code>Nama</code> yang dipisahkan oleh koma atau tab.</p>
               
-              <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50 hover:bg-gray-100 transition">
+              <div class="border-2 border-dashed border-slate-300 hover:border-blue-400 rounded-2xl p-10 text-center bg-slate-50 hover:bg-blue-50/30 transition-colors group">
                 <input type="file" @change="handleFileUpload" accept=".csv, .txt" id="fileUpload" class="hidden">
                 <label for="fileUpload" class="cursor-pointer flex flex-col items-center">
-                  <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-3"></i>
-                  <span class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow mb-2">Pilih Fail (CSV / TXT)</span>
-                  <span class="text-xs text-gray-500">{{ selectedFileName || 'Tiada fail dipilih' }}</span>
+                  <div class="bg-white p-4 rounded-full shadow-sm mb-4 group-hover:scale-110 transition-transform">
+                    <i class="fas fa-cloud-upload-alt text-3xl text-blue-500"></i>
+                  </div>
+                  <span class="bg-white border border-slate-200 text-slate-700 hover:text-blue-600 px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors shadow-sm mb-3">Pilih Fail / Semak imbas</span>
+                  <span class="text-xs text-slate-500 font-medium">{{ selectedFileName || 'Tiada fail dipilih' }}</span>
                 </label>
               </div>
 
-              <div v-if="parsedStaffList.length > 0" class="mt-4 border rounded overflow-hidden">
-                <div class="bg-green-100 text-green-800 p-2 text-sm font-bold flex justify-between items-center">
-                  <span>Berjaya mengekstrak {{ parsedStaffList.length }} rekod.</span>
-                  <button @click="uploadStaffData" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs shadow">Muat Naik ke Sistem</button>
+              <div v-if="parsedStaffList.length > 0" class="mt-6 border border-slate-200 rounded-2xl overflow-hidden bg-white">
+                <div class="bg-emerald-50 border-b border-emerald-100 text-emerald-800 p-4 text-sm font-bold flex justify-between items-center">
+                  <div class="flex items-center">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    <span>{{ parsedStaffList.length }} rekod sedia dimuat naik.</span>
+                  </div>
+                  <button @click="uploadStaffData" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-sm transition-colors transform hover:-translate-y-0.5">Muat Naik Sekarang</button>
                 </div>
-                <div class="max-h-48 overflow-y-auto bg-white p-2 text-xs font-mono">
-                  <div v-for="(s, idx) in parsedStaffList.slice(0,5)" :key="idx" class="border-b py-1">{{ s.id }} - {{ s.name }}</div>
-                  <div v-if="parsedStaffList.length > 5" class="py-1 text-gray-400 italic">... dan {{ parsedStaffList.length - 5 }} lagi</div>
+                <div class="max-h-56 overflow-y-auto p-4 text-sm font-mono bg-slate-50/50">
+                  <div v-for="(s, idx) in parsedStaffList.slice(0,5)" :key="idx" class="py-2 border-b border-slate-100 flex gap-4">
+                    <span class="text-slate-400 w-20">{{ s.id }}</span>
+                    <span class="text-slate-700 font-medium">{{ s.name }}</span>
+                  </div>
+                  <div v-if="parsedStaffList.length > 5" class="py-3 text-slate-400 text-xs italic text-center">... dan {{ parsedStaffList.length - 5 }} baris data lagi tersembunyi.</div>
                 </div>
-              </div>
-
-              <!-- Mesej Status Admin -->
-              <div v-if="sysMessage" class="mt-4 p-3 rounded-lg text-sm border font-semibold flex justify-between items-center" :class="sysMessage.type === 'error' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-green-50 text-green-700 border-green-200'">
-                <span><i :class="sysMessage.type === 'error' ? 'fas fa-exclamation-triangle' : 'fas fa-check-circle'" class="mr-2"></i> {{ sysMessage.text }}</span>
-                <button @click="sysMessage = null" class="text-gray-400"><i class="fas fa-times"></i></button>
               </div>
             </div>
+            
+             <!-- Admin Toast Messages -->
+             <transition name="fade">
+              <div v-if="sysMessage" class="mt-6 p-4 rounded-xl shadow-sm flex items-center justify-between font-medium border" :class="sysMessage.type === 'error' ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'">
+                <div class="flex items-center">
+                  <i :class="sysMessage.type === 'error' ? 'fas fa-exclamation-triangle' : 'fas fa-check-circle'" class="mr-3"></i> 
+                  <span class="text-sm">{{ sysMessage.text }}</span>
+                </div>
+                <button @click="sysMessage = null" class="opacity-50 hover:opacity-100 transition-opacity"><i class="fas fa-times"></i></button>
+              </div>
+            </transition>
           </div>
         </div>
       </transition>
     </main>
 
     <!-- FOOTER -->
-    <footer class="bg-white border-t p-3 text-center text-xs text-gray-400 no-print">
-      &copy; 2026 SRATI - Sistem Pengurusan Kehadiran Pintar
+    <footer class="bg-white border-t border-slate-100 p-4 text-center no-print">
+      <p class="text-[11px] text-slate-400 font-medium">&copy; {{ new Date().getFullYear() }} SRATI - Sistem Pengurusan Kehadiran Pintar</p>
     </footer>
   </div>
 
@@ -393,7 +502,7 @@
     const app = Vue.createApp({
       data() {
         return {
-          // Hardcoded URL GAS
+          // Pautan Google Apps Script Terkini
           gasUrl: 'https://script.google.com/macros/s/AKfycbzqwlVFkcqECI9Ln2-_IGN-pTHVpx-Y5bJ3hTpoHECt2844h5Ma3rn6RvTav-05KYNFfg/exec',
           
           view: 'login', // login, teacher, admin
@@ -407,56 +516,7 @@
           // Data Login Guru
           selectedStaff: '',
           
-          // Senarai 47 Staf Hardcoded dari MAKLUMAT STAF_2 (Sebagai paparan UI)
-          staffList: [
-            { id: 'SRATI001', name: 'MOHD NASRULLAH BIN AZIZAN' },
-            { id: 'SRATI002', name: 'MOHD ELYAS BIN MOHD BAKRI' },
-            { id: 'SRATI003', name: 'SITI HAJAR BINTI MESRAH' },
-            { id: 'SRATI004', name: 'HALIMAH BINTI ZAINON' },
-            { id: 'SRATI005', name: 'AHMAD ZAIM AZHAN BIN AHMAD ZAINALABIDIN' },
-            { id: 'SRATI006', name: 'ALYA SOFEA BINTI SAUFIE' },
-            { id: 'SRATI007', name: 'FARIDAH BINTI AHMAD' },
-            { id: 'SRATI008', name: 'KHAIRUNNISA BINTI ZULKIFLI' },
-            { id: 'SRATI009', name: 'MUHAMAD FAKRUL SYAKİRİN BİN MOHD ROSLAN' },
-            { id: 'SRATI010', name: 'MUHAMMAD AZHAD BIN SHAIFUL ASGHAR' },
-            { id: 'SRATI011', name: 'MUHAMMAD HAIMAN BIN MD RAZALLI' },
-            { id: 'SRATI012', name: 'MUHAMMAD HIFZHAN HANAFI BIN AHMAD ZAILANI' },
-            { id: 'SRATI013', name: 'MUHAMMAD RIDZUAN BIN MOHAMMAD BASHA' },
-            { id: 'SRATI014', name: 'MUHAMMAD SYAHMI BIN ROSLEY' },
-            { id: 'SRATI015', name: 'NOR ALBADRIAH BINTI ISMAIL' },
-            { id: 'SRATI016', name: 'NOR AQILAH BINTI AHMAD' },
-            { id: 'SRATI017', name: 'NOR SAFFINAS BINTI ZAHARI' },
-            { id: 'SRATI018', name: 'NORA SHATIRAH BINTI AHMAD KHATIB' },
-            { id: 'SRATI019', name: 'NUR FAIZAH FARHANAH BINTI MEOR MAZLI' },
-            { id: 'SRATI020', name: 'NURAMIRA ATHIRA BINTI MOHAMAD NOOR' },
-            { id: 'SRATI021', name: 'NURSYAZLJANA SYAZIRA BINTI ROMIZI' },
-            { id: 'SRATI022', name: 'SITI KHODIJAH BINTI MOHAMMAD LAZIM' },
-            { id: 'SRATI023', name: 'WAN SAMIHAH BINTI WAN ABDUL MANAFF' },
-            { id: 'SRATI024', name: 'AMIRA BINTI MOHD SOBRI' },
-            { id: 'SRATI025', name: 'FAZLINA SHAHIDA BUNTI AHAMAD' },
-            { id: 'SRATI026', name: 'MOHAMMAD AIZUDDIN ASRAF BIN AHMAD' },
-            { id: 'SRATI027', name: 'MOHD HIDAYAT BIN AZIZAN' },
-            { id: 'SRATI028', name: 'MUHAMMAD ADIL BIN ADLAN' },
-            { id: 'SRATI029', name: 'MUHAMMAD FAIZAL BIN MOHD NOOR' },
-            { id: 'SRATI030', name: 'MUHAMMAD IKRIMAH BIN IDRIS' },
-            { id: 'SRATI031', name: 'NUR AQILAH BINTI NOOR AZMI' },
-            { id: 'SRATI032', name: 'NUR SALAM BIN MOHD ZAWI' },
-            { id: 'SRATI033', name: 'NURUL AQILAH BINTI BASRI' },
-            { id: 'SRATI034', name: 'NURUL SALASIAH BINTI YASIN MAT' },
-            { id: 'SRATI035', name: 'ABDULLAH BIN YAHAYA' },
-            { id: 'SRATI036', name: 'KAMALIAH BINTI ALIFIAH' },
-            { id: 'SRATI037', name: 'NOOR HAYATI BINTI HARUN' },
-            { id: 'SRATI038', name: 'NUR SYAHADAH BINTI ZAINUL KAMAL' },
-            { id: 'SRATI039', name: 'RAFIZATUN SAADIAH BINTI KARIM' },
-            { id: 'SRATI040', name: 'ROHAIDA BINTI ABD RAZAK' },
-            { id: 'SRATI041', name: 'SALINA BINTI MOHAMED KHİR' },
-            { id: 'SRATI042', name: 'ZAKIAH BINTI MOKHTAR' },
-            { id: 'SRATI043', name: 'NURUL IFFAH BINTI CHE MOHAMED' },
-            { id: 'SRATI044', name: 'KHAIRUL BARIAH BINTI TAJUL HALIM' },
-            { id: 'SRATI045', name: 'NORAINI BINTIMAT ISA' },
-            { id: 'SRATI046', name: 'NORMAISARAH BINTI OTHMAN' },
-            { id: 'SRATI047', name: 'ROSINITA BINTI LEMAN' }
-          ],
+          staffList: [],
 
           // State Semasa Guru
           currentUser: null,
@@ -470,7 +530,7 @@
             accuracy: null,
             valid: false,
             distance: null,
-            status: 'Menunggu Akses GPS...'
+            status: 'Menunggu isyarat lokasi...'
           },
           schoolCoords: { lat: 4.6738, lng: 101.1578 },
           
@@ -483,13 +543,12 @@
           
           // Admin Data
           adminTab: 'hadir',
-          adminDate: new Date().toLocaleDateString('en-CA'), // Format yyyy-mm-dd
+          adminDate: new Date().toLocaleDateString('en-CA'),
           adminLogs: [],
           adminStats: { total: 0, present: 0, offcampus: 0, course: 0, completed: 0 },
           selectedFileName: '',
           parsedStaffList: [],
           
-          // Demo Mode
           demoMode: false
         };
       },
@@ -501,6 +560,7 @@
       mounted() {
         this.updateClock();
         this.clockInterval = setInterval(this.updateClock, 1000);
+        this.fetchStaffList();
       },
       beforeUnmount() {
         clearInterval(this.clockInterval);
@@ -509,60 +569,73 @@
         updateClock() {
           this.currentTime = new Date().toLocaleTimeString('ms-MY', { hour12: false });
         },
+        async fetchStaffList() {
+          try {
+            const res = await this.apiCall({ action: 'getStaffList' });
+            if (res.success && res.staffList) {
+              this.staffList = res.staffList;
+            }
+          } catch (e) {
+            console.log('Gagal memuat turun senarai staf.');
+          }
+        },
         showMessage(text, type = 'success') {
           this.sysMessage = { text, type };
           setTimeout(() => { this.sysMessage = null; }, 5000);
         },
         
-        // ---- SISTEM TERAS (API COMMUNICATION) ----
         async apiCall(payload) {
           try {
             const response = await fetch(this.gasUrl, {
               method: 'POST',
               body: JSON.stringify(payload),
-              headers: { 'Content-Type': 'text/plain' } // Hindari CORS Options Preflight
+              headers: { 'Content-Type': 'text/plain' } 
             });
             return await response.json();
           } catch (e) {
             console.error("API Call Failed:", e);
-            // Fallback: Mod Demo
             this.demoMode = true;
             return this.mockApi(payload);
           }
         },
         
-        // Mock API untuk Demo
         mockApi(payload) {
           const t = new Date().toISOString();
+          if (payload.action === 'getStaffList') {
+            return {
+              success: true,
+              staffList: [
+                { id: 'S001', name: 'GURU CONTOH SATU' },
+                { id: 'S002', name: 'GURU CONTOH DUA' }
+              ]
+            };
+          }
           if (payload.action === 'adminLogin') {
-            if (payload.username === 'admin' && payload.password === 'ehadiradmin2001') return { success: true, token: 'demo-token' };
+            if (payload.username === 'admin') return { success: true, token: 'demo-token' };
             return { success: false, message: 'Kredensial salah (Demo)' };
           }
           if (payload.action === 'login') {
-            const staff = this.staffList.find(s => s.id === payload.staffId);
-            if (!staff) return { success: false, message: 'ID tidak dijumpai.' };
-            return { success: true, user: { staffId: staff.id, name: staff.name }, state: 'NOT_CHECKED_IN' };
+            return { success: true, user: { staffId: payload.staffId, name: "Staf (Mod Demo)" }, state: 'NOT_CHECKED_IN' };
           }
           if (payload.action === 'getAdminData') {
             return { 
               success: true, 
               stats: { total: 47, present: 5, offcampus: 1, course: 2, completed: 1 },
               attendance: [
-                {id: 'SRATI001', name: 'MOHD NASRULLAH BIN AZIZAN', status: 'PRESENT', timeIn: t, timeOut: ''},
-                {id: 'SRATI002', name: 'MOHD ELYAS BIN MOHD BAKRI', status: 'COURSE', timeIn: t, timeOut: ''},
-                {id: 'SRATI003', name: 'SITI HAJAR BINTI MESRAH', status: 'OFF_CAMPUS', timeIn: t, timeOut: '', latestDep: t}
+                {id: 'S001', name: 'ALI BIN ABU', status: 'PRESENT', timeIn: t, timeOut: ''},
+                {id: 'S002', name: 'SITI AMINAH', status: 'OFF_CAMPUS', timeIn: t, timeOut: '', latestDep: t}
               ]
             };
           }
           if (payload.action === 'bulkRegister') return { success: true, message: 'Berjaya muat naik pukal (Demo)' };
           
-          return { success: true, message: 'Tindakan berjaya direkod (Mod Demo)', time: t, distance: 50 };
+          return { success: true, message: 'Tindakan direkod (Demo)', time: t, distance: 50 };
         },
 
-        // ---- LOKASI (GPS) ----
         initGPS() {
-          this.location.status = 'Menyemak GPS...';
+          this.location.status = 'Menyemak isyarat GPS...';
           this.location.valid = false;
+          this.location.distance = null;
           
           if (!navigator.geolocation) {
             this.location.status = 'Pelayar tidak menyokong GPS.';
@@ -575,7 +648,6 @@
               this.location.lng = pos.coords.longitude;
               this.location.accuracy = pos.coords.accuracy;
               
-              // Kalkulasi jarak Haversine (ke sekolah)
               const R = 6371e3;
               const dLat = (this.schoolCoords.lat - this.location.lat) * Math.PI / 180;
               const dLon = (this.schoolCoords.lng - this.location.lng) * Math.PI / 180;
@@ -587,16 +659,14 @@
               
               if (dist <= 200) {
                 this.location.valid = true;
-                this.location.status = 'Lokasi Disahkan: Dalam Zon Sekolah';
+                this.location.status = 'Di dalam zon kawasan sekolah';
               } else {
                 this.location.valid = false;
-                this.location.status = 'Luar Zon (Jarak: ' + dist + 'm)';
-                // Semasa demo/testing di luar kawasan sekolah, jadikan ini `true` secara maya jika mahu.
-                // this.location.valid = true; this.location.status = 'Demo: Bypass Zon Sekolah';
+                this.location.status = 'Luar Zon Sekolah';
               }
             },
             (err) => {
-              this.location.status = 'Akses GPS Ditolak / Gagal.';
+              this.location.status = 'Akses GPS ditolak/lemah.';
             },
             { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
           );
@@ -611,14 +681,11 @@
           return id;
         },
 
-        // ---- LOG MASUK ----
         async loginTeacher() {
           if (!this.selectedStaff) return;
-          
           this.isLoading = true;
           this.loadingMsg = 'Mengesahkan Identiti & Lokasi...';
           
-          // Mulakan GPS serentak ketika log masuk
           this.initGPS();
           
           const payload = {
@@ -636,7 +703,7 @@
             this.view = 'teacher';
             this.showMessage(`Selamat datang, ${res.user.name}.`);
           } else {
-            this.selectedStaff = ''; // Reset selection
+            this.selectedStaff = ''; 
             this.showMessage(res.message, 'error');
           }
         },
@@ -668,12 +735,12 @@
           this.adminUser = '';
           this.adminPass = '';
           this.adminToken = '';
+          this.fetchStaffList(); 
         },
 
-        // ---- TINDAKAN GURU ----
         async performAction(actionStr) {
           if (!this.location.valid && !this.demoMode) {
-            this.showMessage('Sila pastikan anda berada di kawasan sekolah (GPS).', 'error');
+            this.showMessage('Pastikan anda berada di kawasan sekolah.', 'error');
             return;
           }
           
@@ -700,14 +767,12 @@
 
           if (res.success) {
             this.showMessage(res.message);
-            // Kemaskini state bergantung pada butang
             if (actionStr === 'checkIn') this.teacherState = 'PRESENT';
             if (actionStr === 'startCourse') this.teacherState = 'COURSE';
             if (actionStr === 'startOffCampus') this.teacherState = 'OFF_CAMPUS';
             if (actionStr === 'returnSchool') this.teacherState = 'RETURNED';
             if (actionStr === 'checkOut') this.teacherState = 'COMPLETED';
             
-            // Reset input luar
             this.offCampus.destination = '';
             this.offCampus.reason = '';
           } else {
@@ -715,7 +780,6 @@
           }
         },
 
-        // ---- PENTADBIR ----
         async fetchAdminData() {
           this.isLoading = true;
           this.loadingMsg = 'Memuat Data...';
@@ -739,47 +803,33 @@
           }
         },
 
-        // ---- MUAT NAIK PUKAL STAF (ADMIN) ----
         handleFileUpload(event) {
           const file = event.target.files[0];
           if (!file) return;
-          
           this.selectedFileName = file.name;
           const reader = new FileReader();
-          
-          reader.onload = (e) => {
-            const text = e.target.result;
-            this.parseStaffText(text);
-          };
+          reader.onload = (e) => { this.parseStaffText(e.target.result); };
           reader.readAsText(file);
         },
 
         parseStaffText(text) {
           const lines = text.split('\n');
           this.parsedStaffList = [];
-          
           for (let i = 0; i < lines.length; i++) {
             const line = lines[i].trim();
             if (!line) continue;
-            
-            // Cuba belah guna tab atau koma
             let cols = line.split('\t');
             if (cols.length < 2) cols = line.split(',');
-            
             if (cols.length >= 2) {
               const id = cols[0].replace(/['"]/g, '').trim();
               const name = cols[1].replace(/['"]/g, '').trim();
-              
-              if (id.startsWith('SRATI') || id.match(/^[A-Z0-9]+$/)) {
-                this.parsedStaffList.push({ id, name });
-              }
+              if (id.length > 0) this.parsedStaffList.push({ id, name });
             }
           }
         },
 
         async uploadStaffData() {
           if (this.parsedStaffList.length === 0) return;
-          
           this.isLoading = true;
           this.loadingMsg = 'Mendaftar Senarai Guru...';
           
@@ -806,12 +856,11 @@
           window.print();
         },
 
-        // ---- HELPERS UI ----
         statusText(state) {
           const s = {
             'NOT_CHECKED_IN': 'Belum Hadir',
             'PRESENT': 'Hadir (Sekolah)',
-            'COURSE': 'Berkursus / Bengkel',
+            'COURSE': 'Berkursus',
             'OFF_CAMPUS': 'Tugas Luar',
             'RETURNED': 'Hadir (Kembali)',
             'COMPLETED': 'Tamat Tugas'
@@ -820,14 +869,25 @@
         },
         statusColorClass(state) {
           const c = {
-            'NOT_CHECKED_IN': 'bg-gray-200 text-gray-700',
-            'PRESENT': 'bg-green-100 text-green-800',
-            'COURSE': 'bg-purple-100 text-purple-800',
-            'OFF_CAMPUS': 'bg-yellow-100 text-yellow-800',
-            'RETURNED': 'bg-blue-100 text-blue-800',
-            'COMPLETED': 'bg-red-100 text-red-800'
+            'NOT_CHECKED_IN': 'bg-slate-100 text-slate-600',
+            'PRESENT': 'bg-emerald-100/60 text-emerald-700 border border-emerald-200',
+            'COURSE': 'bg-indigo-100/60 text-indigo-700 border border-indigo-200',
+            'OFF_CAMPUS': 'bg-amber-100/60 text-amber-700 border border-amber-200',
+            'RETURNED': 'bg-blue-100/60 text-blue-700 border border-blue-200',
+            'COMPLETED': 'bg-rose-100/60 text-rose-700 border border-rose-200'
           };
-          return c[state] || 'bg-gray-100';
+          return c[state] || 'bg-slate-100 text-slate-700';
+        },
+        statusDotClass(state) {
+          const d = {
+            'NOT_CHECKED_IN': 'bg-slate-400',
+            'PRESENT': 'bg-emerald-500',
+            'COURSE': 'bg-indigo-500',
+            'OFF_CAMPUS': 'bg-amber-500',
+            'RETURNED': 'bg-blue-500',
+            'COMPLETED': 'bg-rose-500'
+          };
+          return d[state] || 'bg-slate-400';
         },
         formatTime(dateStr) {
           if (!dateStr) return '';
