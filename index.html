@@ -184,7 +184,7 @@
               <div class="flex-1 min-w-0">
                 <p class="text-sm font-bold truncate" :class="location.valid ? 'text-emerald-700' : 'text-rose-600'">{{ location.status }}</p>
                 <p v-if="location.distance !== null" class="text-xs text-slate-500 mt-0.5 font-medium">
-                  <i class="fas fa-map-marker-alt mr-1 opacity-60"></i> Jarak dari sekolah: {{ location.distance }}m
+                  <i class="fas fa-map-marker-alt mr-1 opacity-60"></i> Jarak: {{ location.distance }}m | Ketepatan: {{ Math.round(location.accuracy) }}m
                 </p>
               </div>
             </div>
@@ -712,11 +712,19 @@
           this.location.status = 'Menyemak isyarat GPS...';
           this.location.valid = false;
           this.location.distance = null;
+          this.location.accuracy = null;
           
           if (!navigator.geolocation) {
             this.location.status = 'Pelayar tidak menyokong GPS.';
             return;
           }
+
+          // Options diubah suai untuk kestabilan isyarat
+          const options = {
+            enableHighAccuracy: true,
+            timeout: 20000,        // Tingkatkan masa menunggu isyarat sehingga 20 saat
+            maximumAge: 5000       // Benarkan data caching maksimum 5 saat yang lalu sahaja
+          };
 
           navigator.geolocation.getCurrentPosition(
             (pos) => {
@@ -733,7 +741,11 @@
               
               this.location.distance = dist;
               
-              if (dist <= 200) {
+              // Menyemak syarat ketepatan (accuracy) selari dengan backend (50 meter)
+              if (this.location.accuracy > 50) {
+                 this.location.valid = false;
+                 this.location.status = 'Ketepatan GPS lemah. Sila ke kawasan lebih terbuka.';
+              } else if (dist <= 200) {
                 this.location.valid = true;
                 this.location.status = 'Di dalam zon kawasan sekolah';
               } else {
@@ -742,9 +754,23 @@
               }
             },
             (err) => {
-              this.location.status = 'Akses GPS ditolak/lemah.';
+              console.warn("Ralat GPS:", err);
+              switch(err.code) {
+                case err.PERMISSION_DENIED:
+                  this.location.status = 'Akses lokasi ditolak. Sila benarkan akses lokasi pelayar.';
+                  break;
+                case err.POSITION_UNAVAILABLE:
+                  this.location.status = 'Maklumat lokasi tidak tersedia pada peranti ini.';
+                  break;
+                case err.TIMEOUT:
+                  this.location.status = 'Masa pencarian isyarat tamat. Sila tekan Segar semula.';
+                  break;
+                default:
+                  this.location.status = 'Ralat GPS tidak diketahui.';
+                  break;
+              }
             },
-            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            options
           );
         },
         
