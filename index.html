@@ -169,7 +169,7 @@
               <h3 class="text-sm font-bold text-slate-700 flex items-center">
                 <i class="fas fa-satellite-dish mr-2 text-slate-400"></i> Isyarat GPS
               </h3>
-              <button @click="initGPS" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded-lg transition-colors flex items-center font-medium">
+              <button @click="refreshGPS" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded-lg transition-colors flex items-center font-medium">
                 <i class="fas fa-sync-alt mr-1.5"></i> Segar
               </button>
             </div>
@@ -201,7 +201,7 @@
           <div class="space-y-3">
             
             <!-- Daftar Masuk -->
-            <button v-if="teacherState === 'NOT_CHECKED_IN'" @click="performAction('checkIn')" :disabled="!location.valid" :class="!location.valid ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed' : 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/20 hover:-translate-y-0.5'" class="w-full border p-5 rounded-2xl font-bold flex flex-col items-center justify-center transition-all h-28 relative overflow-hidden group">
+            <button v-if="teacherState === 'NOT_CHECKED_IN'" @click="performAction('checkIn')" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/20 hover:-translate-y-0.5 border p-5 rounded-2xl font-bold flex flex-col items-center justify-center transition-all h-28 relative overflow-hidden group">
               <div v-if="location.valid" class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out"></div>
               <i class="fas fa-sign-in-alt text-3xl mb-2 relative z-10"></i>
               <span class="relative z-10 tracking-wide">DAFTAR MASUK</span>
@@ -233,21 +233,21 @@
                   </div>
                   <input type="text" v-model="offCampus.reason" placeholder="Tujuan Rasmi..." class="w-full pl-9 pr-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 bg-slate-50 transition-colors">
                 </div>
-                <button @click="performAction('startOffCampus')" :disabled="!location.valid || !offCampus.destination" :class="(!location.valid || !offCampus.destination) ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-amber-500 hover:bg-amber-600 text-white shadow-md shadow-amber-500/20'" class="w-full py-3 rounded-xl font-bold transition-all mt-2">
+                <button @click="performAction('startOffCampus')" :disabled="!offCampus.destination" :class="!offCampus.destination ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-amber-500 hover:bg-amber-600 text-white shadow-md shadow-amber-500/20'" class="w-full py-3 rounded-xl font-bold transition-all mt-2">
                   MULA PERGERAKAN LUAR
                 </button>
               </div>
             </div>
 
             <!-- Kembali -->
-            <button v-if="teacherState === 'OFF_CAMPUS'" @click="performAction('returnSchool')" :disabled="!location.valid" :class="!location.valid ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20 hover:-translate-y-0.5'" class="w-full border p-5 rounded-2xl font-bold flex flex-col items-center justify-center transition-all h-28 relative overflow-hidden group">
+            <button v-if="teacherState === 'OFF_CAMPUS'" @click="performAction('returnSchool')" class="w-full bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/20 hover:-translate-y-0.5 border p-5 rounded-2xl font-bold flex flex-col items-center justify-center transition-all h-28 relative overflow-hidden group">
               <div v-if="location.valid" class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out"></div>
               <i class="fas fa-undo-alt text-3xl mb-2 relative z-10"></i>
               <span class="relative z-10 tracking-wide text-sm">REKOD KEMBALI</span>
             </button>
 
             <!-- Pulang -->
-            <button v-if="teacherState === 'PRESENT' || teacherState === 'RETURNED'" @click="performAction('checkOut')" :disabled="!location.valid" :class="!location.valid ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-rose-500 hover:bg-rose-600 text-white shadow-lg shadow-rose-500/20 hover:-translate-y-0.5'" class="w-full p-5 rounded-2xl font-bold flex flex-col items-center justify-center transition-all h-28 mt-6 relative overflow-hidden group">
+            <button v-if="teacherState === 'PRESENT' || teacherState === 'RETURNED'" @click="performAction('checkOut')" class="w-full bg-rose-500 hover:bg-rose-600 text-white shadow-lg shadow-rose-500/20 hover:-translate-y-0.5 p-5 rounded-2xl font-bold flex flex-col items-center justify-center transition-all h-28 mt-6 relative overflow-hidden group">
                <div v-if="location.valid" class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out"></div>
               <i class="fas fa-door-open text-3xl mb-2 relative z-10"></i>
               <span class="relative z-10 tracking-wide">DAFTAR PULANG</span>
@@ -709,69 +709,83 @@
         },
 
         initGPS() {
-          this.location.status = 'Menyemak isyarat GPS...';
-          this.location.valid = false;
-          this.location.distance = null;
-          this.location.accuracy = null;
-          
-          if (!navigator.geolocation) {
-            this.location.status = 'Pelayar tidak menyokong GPS.';
-            return;
-          }
+          return new Promise((resolve) => {
+            this.location.status = 'Menyemak isyarat GPS...';
+            this.location.valid = false;
+            this.location.distance = null;
+            this.location.accuracy = null;
+            
+            if (!navigator.geolocation) {
+              this.location.status = 'Pelayar tidak menyokong GPS.';
+              resolve(false);
+              return;
+            }
 
-          // Options diubah suai untuk kestabilan isyarat
-          const options = {
-            enableHighAccuracy: true,
-            timeout: 20000,        // Tingkatkan masa menunggu isyarat sehingga 20 saat
-            maximumAge: 0          // Paksa pelayar dapatkan lokasi baharu (jangan guna cache)
-          };
+            // Options diubah suai untuk kestabilan isyarat
+            const options = {
+              enableHighAccuracy: true,
+              timeout: 20000,        // Tingkatkan masa menunggu isyarat sehingga 20 saat
+              maximumAge: 0          // Paksa pelayar dapatkan lokasi baharu (jangan guna cache)
+            };
 
-          navigator.geolocation.getCurrentPosition(
-            (pos) => {
-              this.location.lat = pos.coords.latitude;
-              this.location.lng = pos.coords.longitude;
-              this.location.accuracy = pos.coords.accuracy;
-              
-              const R = 6371e3;
-              const dLat = (this.schoolCoords.lat - this.location.lat) * Math.PI / 180;
-              const dLon = (this.schoolCoords.lng - this.location.lng) * Math.PI / 180;
-              const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(this.location.lat * Math.PI / 180) * Math.cos(this.schoolCoords.lat * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
-              const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-              const dist = Math.round(R * c);
-              
-              this.location.distance = dist;
-              
-              // Menyemak syarat ketepatan (accuracy) selari dengan backend (50 meter)
-              if (this.location.accuracy > 50) {
-                 this.location.valid = false;
-                 this.location.status = 'Ketepatan GPS lemah. Sila ke kawasan lebih terbuka.';
-              } else if (dist <= 200) {
-                this.location.valid = true;
-                this.location.status = 'Di dalam zon kawasan sekolah';
-              } else {
-                this.location.valid = false;
-                this.location.status = 'Luar Zon Sekolah';
-              }
-            },
-            (err) => {
-              console.warn("Ralat GPS:", err);
-              switch(err.code) {
-                case err.PERMISSION_DENIED:
-                  this.location.status = 'Akses lokasi ditolak. Sila benarkan akses lokasi pelayar.';
-                  break;
-                case err.POSITION_UNAVAILABLE:
-                  this.location.status = 'Maklumat lokasi tidak tersedia pada peranti ini.';
-                  break;
-                case err.TIMEOUT:
-                  this.location.status = 'Masa pencarian isyarat tamat. Sila tekan Segar semula.';
-                  break;
-                default:
-                  this.location.status = 'Ralat GPS tidak diketahui.';
-                  break;
-              }
-            },
-            options
-          );
+            navigator.geolocation.getCurrentPosition(
+              (pos) => {
+                this.location.lat = pos.coords.latitude;
+                this.location.lng = pos.coords.longitude;
+                this.location.accuracy = pos.coords.accuracy;
+                
+                const R = 6371e3;
+                const dLat = (this.schoolCoords.lat - this.location.lat) * Math.PI / 180;
+                const dLon = (this.schoolCoords.lng - this.location.lng) * Math.PI / 180;
+                const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(this.location.lat * Math.PI / 180) * Math.cos(this.schoolCoords.lat * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                const dist = Math.round(R * c);
+                
+                this.location.distance = dist;
+                
+                // Menyemak syarat ketepatan (accuracy) selari dengan backend (50 meter)
+                if (this.location.accuracy > 50) {
+                   this.location.valid = false;
+                   this.location.status = 'Ketepatan GPS lemah. Sila ke kawasan lebih terbuka.';
+                   resolve(false);
+                } else if (dist <= 200) {
+                  this.location.valid = true;
+                  this.location.status = 'Di dalam zon kawasan sekolah';
+                  resolve(true);
+                } else {
+                  this.location.valid = false;
+                  this.location.status = 'Luar Zon Sekolah';
+                  resolve(false);
+                }
+              },
+              (err) => {
+                console.warn("Ralat GPS:", err);
+                switch(err.code) {
+                  case err.PERMISSION_DENIED:
+                    this.location.status = 'Akses lokasi ditolak. Sila benarkan akses lokasi pelayar.';
+                    break;
+                  case err.POSITION_UNAVAILABLE:
+                    this.location.status = 'Maklumat lokasi tidak tersedia pada peranti ini.';
+                    break;
+                  case err.TIMEOUT:
+                    this.location.status = 'Masa pencarian isyarat tamat. Sila tekan Segar semula.';
+                    break;
+                  default:
+                    this.location.status = 'Ralat GPS tidak diketahui.';
+                    break;
+                }
+                resolve(false);
+              },
+              options
+            );
+          });
+        },
+        
+        async refreshGPS() {
+          this.isLoading = true;
+          this.loadingMsg = 'Menyemak isyarat GPS...';
+          await this.initGPS();
+          this.isLoading = false;
         },
         
         getDeviceId() {
@@ -786,9 +800,7 @@
         async loginTeacher() {
           if (!this.selectedStaff) return;
           this.isLoading = true;
-          this.loadingMsg = 'Mengesahkan Identiti & Lokasi...';
-          
-          this.initGPS();
+          this.loadingMsg = 'Mengesahkan Identiti & Peranti...';
           
           const payload = {
             action: 'login',
@@ -803,7 +815,7 @@
             this.currentUser = res.user;
             this.teacherState = res.state;
             this.view = 'teacher';
-            this.showMessage(`Selamat datang, ${res.user.name}.`);
+            this.showMessage(`Selamat datang, ${res.user.name}. Sistem akan meminta akses lokasi semasa anda merekod kehadiran.`);
           } else {
             this.selectedStaff = ''; 
             this.showMessage(res.message, 'error');
@@ -859,9 +871,18 @@
         },
 
         async performAction(actionStr) {
-          if (!this.location.valid && !this.demoMode) {
-            this.showMessage('Pastikan anda berada di kawasan sekolah.', 'error');
-            return;
+          if (!this.demoMode) {
+            if (!this.location.valid) {
+              this.isLoading = true;
+              this.loadingMsg = 'Mendapatkan isyarat lokasi... Sila pastikan GPS diaktifkan.';
+              const isLocValid = await this.initGPS();
+              this.isLoading = false;
+              
+              if (!isLocValid) {
+                this.showMessage('Sila pastikan GPS diaktifkan dan anda berada di kawasan yang dibenarkan.', 'error');
+                return;
+              }
+            }
           }
           
           this.isLoading = true;
