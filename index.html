@@ -192,7 +192,7 @@
             <div v-if="!location.valid && location.distance !== null" class="mt-4 bg-rose-50/50 border border-rose-100 p-3 rounded-lg flex items-start gap-2">
               <i class="fas fa-exclamation-circle text-rose-500 mt-0.5"></i>
               <p class="text-xs text-rose-600 leading-relaxed font-medium">
-                Anda berada di luar zon (200m). Dekati kawasan sekolah untuk pendaftaran kehadiran.
+                Anda berada di luar zon ({{ currentRadius }}m). Dekati kawasan sekolah untuk pendaftaran kehadiran.
               </p>
             </div>
           </div>
@@ -204,7 +204,7 @@
             <button v-if="teacherState === 'NOT_CHECKED_IN'" @click="performAction('checkIn')" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/20 hover:-translate-y-0.5 border p-5 rounded-2xl font-bold flex flex-col items-center justify-center transition-all h-28 relative overflow-hidden group">
               <div v-if="location.valid" class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out"></div>
               <i class="fas fa-sign-in-alt text-3xl mb-2 relative z-10"></i>
-              <span class="relative z-10 tracking-wide">DAFTAR MASUK</span>
+              <span class="relative z-10 tracking-wide">DAFTAR HADIR</span>
             </button>
 
             <!-- Berkursus / Bengkel -->
@@ -321,10 +321,13 @@
             <button @click="adminTab = 'staf'" :class="adminTab === 'staf' ? 'border-b-2 border-emerald-600 text-emerald-600 font-bold' : 'text-slate-500 hover:text-slate-700 font-medium'" class="pb-3 text-sm transition-colors whitespace-nowrap flex items-center">
               <i class="fas fa-user-cog mr-2"></i> Pengurusan Staf
             </button>
+            <button @click="adminTab = 'tetapan'" :class="adminTab === 'tetapan' ? 'border-b-2 border-emerald-600 text-emerald-600 font-bold' : 'text-slate-500 hover:text-slate-700 font-medium'" class="pb-3 text-sm transition-colors whitespace-nowrap flex items-center">
+              <i class="fas fa-cogs mr-2"></i> Tetapan
+            </button>
           </div>
 
           <!-- SUMMARY CARDS -->
-          <div v-if="adminTab !== 'staf'" class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+          <div v-if="adminTab !== 'staf' && adminTab !== 'tetapan'" class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
               <div class="flex justify-between items-start mb-2">
                 <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Jum. Staf</p>
@@ -565,6 +568,40 @@
               </div>
             </div>
           </div>
+
+          <!-- TAB: TETAPAN -->
+          <div v-if="adminTab === 'tetapan'" class="no-print max-w-4xl">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
+              <h3 class="font-bold text-slate-800 text-lg mb-4 flex items-center">
+                <i class="fas fa-map-marker-alt text-emerald-500 mr-2"></i> Radius Jarak Pendaftaran Hadir
+              </h3>
+              <p class="text-sm text-slate-500 mb-6">Pilih radius (jejari) maksimum dalam meter yang membenarkan guru untuk mendaftar kehadiran di sekitar kawasan sekolah.</p>
+              
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <button @click="currentRadius = 200" :class="currentRadius === 200 ? 'bg-emerald-50 border-emerald-500 text-emerald-700 shadow-md ring-2 ring-emerald-500/20' : 'bg-white border-slate-200 text-slate-600 hover:border-emerald-300 hover:bg-slate-50'" class="border-2 rounded-xl p-4 flex flex-col items-center justify-center transition-all">
+                  <span class="text-2xl font-bold mb-1">200m</span>
+                  <span class="text-xs">Standard</span>
+                </button>
+                <button @click="currentRadius = 300" :class="currentRadius === 300 ? 'bg-emerald-50 border-emerald-500 text-emerald-700 shadow-md ring-2 ring-emerald-500/20' : 'bg-white border-slate-200 text-slate-600 hover:border-emerald-300 hover:bg-slate-50'" class="border-2 rounded-xl p-4 flex flex-col items-center justify-center transition-all">
+                  <span class="text-2xl font-bold mb-1">300m</span>
+                  <span class="text-xs">Sederhana</span>
+                </button>
+                <button @click="currentRadius = 500" :class="currentRadius === 500 ? 'bg-emerald-50 border-emerald-500 text-emerald-700 shadow-md ring-2 ring-emerald-500/20' : 'bg-white border-slate-200 text-slate-600 hover:border-emerald-300 hover:bg-slate-50'" class="border-2 rounded-xl p-4 flex flex-col items-center justify-center transition-all">
+                  <span class="text-2xl font-bold mb-1">500m</span>
+                  <span class="text-xs">Luas</span>
+                </button>
+                <button @click="currentRadius = 1200" :class="currentRadius === 1200 ? 'bg-emerald-50 border-emerald-500 text-emerald-700 shadow-md ring-2 ring-emerald-500/20' : 'bg-white border-slate-200 text-slate-600 hover:border-emerald-300 hover:bg-slate-50'" class="border-2 rounded-xl p-4 flex flex-col items-center justify-center transition-all">
+                  <span class="text-2xl font-bold mb-1">1200m</span>
+                  <span class="text-xs text-rose-500 font-semibold">Uji Guna</span>
+                </button>
+              </div>
+              
+              <button @click="updateRadius" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-xl shadow-md transition-colors flex items-center">
+                <i class="fas fa-save mr-2"></i> Simpan Tetapan
+              </button>
+            </div>
+          </div>
+
         </div>
       </transition>
     </main>
@@ -575,7 +612,7 @@
       data() {
         return {
           // Tetapan API Google Apps Script
-          gasUrl: 'https://script.google.com/macros/s/AKfycbyMKz1RtwYqFqFjhpEFdEIz66rm_9wNrK6e4tFN0l8Zin4btBqFHTw1x227Ey2sRBtRxA/exec',
+          gasUrl: 'https://script.google.com/macros/s/AKfycbznRHC7nOkQZczC3rNSm-ctVejT2drfD7kjxwOw-uVoEIvdRRpRI_KL81_owU0jITBs/exec',
           
           // State UI
           view: 'login', // login, teacher, admin
@@ -621,6 +658,7 @@
           adminDate: new Date().toLocaleDateString('en-CA'),
           adminLogs: [],
           adminStats: { total: 0, present: 0, offcampus: 0, course: 0, completed: 0 },
+          currentRadius: 200, // Tambahan state
           selectedFileName: '',
           parsedStaffList: [],
           
@@ -649,6 +687,7 @@
             const res = await this.apiCall({ action: 'getStaffList' });
             if (res.success && res.staffList) {
               this.staffList = res.staffList;
+              if (res.radius) this.currentRadius = res.radius;
             }
           } catch (e) {
             console.log('Gagal memuat turun senarai staf.');
@@ -679,6 +718,7 @@
           if (payload.action === 'getStaffList' || payload.action === 'adminGetStaff') {
             return {
               success: true,
+              radius: 200,
               staffList: [
                 { id: 'S001', name: 'GURU CONTOH SATU', device: 'DEV-123' },
                 { id: 'S002', name: 'GURU CONTOH DUA', device: '' }
@@ -695,6 +735,7 @@
           if (payload.action === 'getAdminData') {
             return { 
               success: true, 
+              radius: 200,
               stats: { total: 47, present: 5, offcampus: 1, course: 2, completed: 1 },
               attendance: [
                 {id: 'S001', name: 'ALI BIN ABU', status: 'PRESENT', timeIn: t, timeOut: ''},
@@ -760,7 +801,7 @@
                  this.location.valid = false;
                  this.location.status = `Ketepatan GPS lemah (${Math.round(this.location.accuracy)}m). Sila ke kawasan lebih terbuka.`;
                  resolve(false);
-              } else if (dist <= 200) {
+              } else if (dist <= this.currentRadius) {
                 this.location.valid = true;
                 this.location.status = 'Di dalam zon kawasan sekolah';
                 resolve(true);
@@ -904,6 +945,23 @@
           if (res.success) {
             this.adminLogs = res.attendance || [];
             this.adminStats = res.stats || { total: 0, present: 0, offcampus: 0, course: 0, completed: 0, absent: 0 };
+            if (res.radius) this.currentRadius = res.radius;
+          } else {
+            this.showMessage(res.message, 'error');
+          }
+        },
+        
+        async updateRadius() {
+          this.isLoading = true;
+          this.loadingMsg = 'Menyimpan tetapan...';
+          const res = await this.apiCall({ 
+            action: 'adminUpdateRadius', 
+            token: this.adminToken, 
+            radius: this.currentRadius 
+          });
+          this.isLoading = false;
+          if (res.success) {
+            this.showMessage(res.message);
           } else {
             this.showMessage(res.message, 'error');
           }
