@@ -710,7 +710,7 @@
 
         initGPS() {
           return new Promise((resolve) => {
-            this.location.status = 'Menyemak isyarat GPS...';
+            this.location.status = 'Sedang mengunci satelit GPS...';
             this.location.valid = false;
             this.location.distance = null;
             this.location.accuracy = null;
@@ -724,60 +724,99 @@
             // Options diubah suai untuk kestabilan isyarat
             const options = {
               enableHighAccuracy: true,
-              timeout: 20000,        // Tingkatkan masa menunggu isyarat sehingga 20 saat
-              maximumAge: 0          // Paksa pelayar dapatkan lokasi baharu (jangan guna cache)
+              timeout: 10000,        
+              maximumAge: 0          
             };
 
-            navigator.geolocation.getCurrentPosition(
+            let bestPos = null;
+            let watchId = null;
+            let timeoutId = null;
+
+            // Fungsi ini dipanggil apabila kita sudah puas hati dengan ketepatan GPS, atau masa tamat
+            const finalizePosition = () => {
+              if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+              if (timeoutId !== null) clearTimeout(timeoutId);
+
+              if (!bestPos) {
+                this.location.status = 'Gagal mendapatkan isyarat GPS.';
+                resolve(false);
+                return;
+              }
+
+              this.location.lat = bestPos.coords.latitude;
+              this.location.lng = bestPos.coords.longitude;
+              this.location.accuracy = bestPos.coords.accuracy;
+              
+              const R = 6371e3;
+              const dLat = (this.schoolCoords.lat - this.location.lat) * Math.PI / 180;
+              const dLon = (this.schoolCoords.lng - this.location.lng) * Math.PI / 180;
+              const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(this.location.lat * Math.PI / 180) * Math.cos(this.schoolCoords.lat * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+              const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+              const dist = Math.round(R * c);
+              
+              this.location.distance = dist;
+              
+              if (this.location.accuracy > 50) {
+                 this.location.valid = false;
+                 this.location.status = `Ketepatan GPS lemah (${Math.round(this.location.accuracy)}m). Sila ke kawasan lebih terbuka.`;
+                 resolve(false);
+              } else if (dist <= 200) {
+                this.location.valid = true;
+                this.location.status = 'Di dalam zon kawasan sekolah';
+                resolve(true);
+              } else {
+                this.location.valid = false;
+                this.location.status = 'Luar Zon Sekolah';
+                resolve(false);
+              }
+            };
+
+            // Mula memantau lokasi secara berterusan
+            watchId = navigator.geolocation.watchPosition(
               (pos) => {
-                this.location.lat = pos.coords.latitude;
-                this.location.lng = pos.coords.longitude;
-                this.location.accuracy = pos.coords.accuracy;
+                // Simpan bacaan terbaik jika ini yang pertama atau lebih baik (accuracy lebih rendah)
+                if (!bestPos || pos.coords.accuracy < bestPos.coords.accuracy) {
+                  bestPos = pos;
+                }
                 
-                const R = 6371e3;
-                const dLat = (this.schoolCoords.lat - this.location.lat) * Math.PI / 180;
-                const dLon = (this.schoolCoords.lng - this.location.lng) * Math.PI / 180;
-                const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(this.location.lat * Math.PI / 180) * Math.cos(this.schoolCoords.lat * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
-                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-                const dist = Math.round(R * c);
-                
-                this.location.distance = dist;
-                
-                // Menyemak syarat ketepatan (accuracy) selari dengan backend (50 meter)
-                if (this.location.accuracy > 50) {
-                   this.location.valid = false;
-                   this.location.status = 'Ketepatan GPS lemah. Sila ke kawasan lebih terbuka.';
-                   resolve(false);
-                } else if (dist <= 200) {
-                  this.location.valid = true;
-                  this.location.status = 'Di dalam zon kawasan sekolah';
-                  resolve(true);
+                // Jika ketepatan sudah sangat baik (bawah 50m), hentikan pencarian awal
+                if (bestPos.coords.accuracy <= 50) {
+                  finalizePosition();
                 } else {
-                  this.location.valid = false;
-                  this.location.status = 'Luar Zon Sekolah';
-                  resolve(false);
+                  this.location.status = `Mencari ketepatan optimum... (${Math.round(bestPos.coords.accuracy)}m)`;
                 }
               },
               (err) => {
                 console.warn("Ralat GPS:", err);
-                switch(err.code) {
-                  case err.PERMISSION_DENIED:
-                    this.location.status = 'Akses lokasi ditolak. Sila benarkan akses lokasi pelayar.';
-                    break;
-                  case err.POSITION_UNAVAILABLE:
-                    this.location.status = 'Maklumat lokasi tidak tersedia pada peranti ini.';
-                    break;
-                  case err.TIMEOUT:
-                    this.location.status = 'Masa pencarian isyarat tamat. Sila tekan Segar semula.';
-                    break;
-                  default:
-                    this.location.status = 'Ralat GPS tidak diketahui.';
-                    break;
+                // Hanya putuskan resolusi dengan ralat jika kita tidak pernah dapat apa-apa bacaan bestPos
+                if (!bestPos) {
+                  if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+                  if (timeoutId !== null) clearTimeout(timeoutId);
+                  switch(err.code) {
+                    case err.PERMISSION_DENIED:
+                      this.location.status = 'Akses lokasi ditolak. Sila benarkan akses lokasi pelayar.';
+                      break;
+                    case err.POSITION_UNAVAILABLE:
+                      this.location.status = 'Maklumat lokasi tidak tersedia pada peranti ini.';
+                      break;
+                    case err.TIMEOUT:
+                      this.location.status = 'Masa pencarian isyarat tamat. Sila tekan Segar semula.';
+                      break;
+                    default:
+                      this.location.status = 'Ralat GPS tidak diketahui.';
+                      break;
+                  }
+                  resolve(false);
                 }
-                resolve(false);
               },
               options
             );
+
+            // Beri masa maksimum 8 saat untuk sistem "warm-up" dan kumpul isyarat terbaik
+            timeoutId = setTimeout(() => {
+              finalizePosition();
+            }, 8000);
+
           });
         },
         
